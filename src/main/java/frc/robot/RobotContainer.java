@@ -9,8 +9,6 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCamera0;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -39,7 +37,6 @@ import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.LoggedTalon.TalonFX.NoOppTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.PhoenixTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
@@ -101,11 +98,11 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        // new Vision(
+        //     drive::addVisionMeasurement,
+        //     new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+        //     new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         intake =
             new Intake(
                 new TalonFXSimpleMotorSim(30, rioCAN, "IntakeRoller", 1, 1),
@@ -182,6 +179,11 @@ public class RobotContainer {
     controller.x().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.LEFT));
     controller.b().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.RIGHT));
     controller.y().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.HUB));
+    controller
+        .rightStick()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
   }
 
   /**

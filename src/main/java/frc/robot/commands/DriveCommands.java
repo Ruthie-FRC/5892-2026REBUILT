@@ -7,8 +7,8 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,12 +23,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.TunableProfiledPIDController;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -102,18 +102,15 @@ public class DriveCommands {
    * absolute rotation with a joystick.
    */
   public static Command joystickDriveAtAngle(
-      Drive drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      Supplier<Rotation2d> rotationSupplier) {
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
 
     // Create PID controller
-    ProfiledPIDController angleController =
-        new ProfiledPIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    TunableProfiledPIDController angleController =
+        new TunableProfiledPIDController(
+            "Drive/JoystickLock",
+            new PIDConstants(ANGLE_KP, 0, ANGLE_KD),
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION),
+            0);
     angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Construct command
@@ -124,9 +121,13 @@ public class DriveCommands {
                   getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
               // Calculate angular speed
+              double currentRotation = drive.getRotation().getRadians();
+              double setpoint = linearVelocity.getAngle().getRadians();
+              setpoint = setpoint > 0 ? setpoint : currentRotation;
+
               double omega =
                   angleController.calculate(
-                      drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+                      currentRotation, linearVelocity.getAngle().getRadians());
 
               // Convert to field relative speeds & send command
               ChassisSpeeds speeds =
