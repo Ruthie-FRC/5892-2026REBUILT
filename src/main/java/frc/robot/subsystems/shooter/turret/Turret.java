@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.turret;
 
 import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.RobotState;
+import frc.robot.subsystems.shooter.ShotCalculator;
 import frc.robot.util.LoggedDIO.LoggedDIO;
 import frc.robot.util.LoggedTalon.TalonFX.LoggedTalonFX;
 import frc.robot.util.LoggedTunableMeasure;
