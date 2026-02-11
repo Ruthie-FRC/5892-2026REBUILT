@@ -58,8 +58,9 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Shooter shooter;
 
-  // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  // Controllers
+  private final CommandXboxController driveController = new CommandXboxController(0);
+  private final CommandXboxController coDriveController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -160,12 +161,12 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driveController.getLeftY(),
+            () -> -driveController.getLeftX(),
+            () -> -driveController.getRightX()));
 
     // Reset gyro to 0° when B button is pressed
-    controller
+    driveController
         .y()
         .onTrue(
             Commands.runOnce(
@@ -174,16 +175,47 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    controller.a().onTrue(ShootCommands.shoot(indexer, shooter));
+    driveController
+        .rightBumper()
+        .or(coDriveController.rightBumper())
+        .whileTrue(ShootCommands.shoot(indexer, shooter));
+    driveController
+        .leftBumper()
+        .or(coDriveController.leftBumper())
+        .toggleOnTrue(intake.extendCommand())
+        .toggleOnFalse(intake.retractCommand());
 
-    controller.x().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.LEFT));
-    controller.b().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.RIGHT));
-    controller.y().onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.HUB));
-    controller
+    driveController
+        .start()
+        .or(coDriveController.start())
+        .whileTrue(shooter.homeCommand()); // 8, right middle button, home
+    driveController
+        .back()
+        .or(coDriveController.back())
+        .whileTrue(indexer.unjam()); // 7, left middle button, unjam
+
+    driveController
+        .x()
+        .or(coDriveController.x())
+        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.LEFT));
+    driveController
+        .b()
+        .or(coDriveController.b())
+        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.RIGHT));
+    driveController
+        .a()
+        .or(coDriveController.a())
+        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.CENTER));
+    driveController
+        .y()
+        .or(coDriveController.y())
+        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.HUB));
+
+    driveController
         .rightStick()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+                drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
   }
 
   /**

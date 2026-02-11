@@ -47,6 +47,9 @@ public class ShotCalculator {
   private static final Translation2d leftTarget =
       rightTarget.plus(new Translation2d(0, (LinesHorizontal.center - rightTarget.getX()) * 2));
 
+  private static final Translation2d centerTarget =
+      new Translation2d(rightTarget.getX(), LinesHorizontal.center);
+
   private Rotation2d turretAngle;
   private Rotation2d hoodAngle = Rotation2d.kZero;
 
@@ -188,12 +191,13 @@ public class ShotCalculator {
   public enum Goal {
     HUB(FieldConstants.hubCenter),
     LEFT(leftTarget),
-    RIGHT(rightTarget);
+    RIGHT(rightTarget),
+    CENTER(centerTarget);
     public final Translation2d pose;
   }
 
   // This should maybe be refactored. It takes an extra loop cycle to actually change the setpoint.
   public Command setGoalCommand(Goal goal) {
-    return Commands.runOnce(() -> this.goal = goal);
+    return Commands.runOnce(() -> this.goal = goal).ignoringDisable(true);
   }
 }

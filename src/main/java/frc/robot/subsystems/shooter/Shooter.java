@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants;
 import frc.robot.util.LoggedDIO.HardwareDIO;
 import frc.robot.util.LoggedDIO.SimDIO;
@@ -74,5 +75,9 @@ public class Shooter {
                 new HardwareDIO("TurretForward", 3));
       }
     }
+  }
+
+  public ParallelCommandGroup homeCommand() {
+    return new ParallelCommandGroup(hood.homingCommand(), turret.homingCommand());
   }
 }
