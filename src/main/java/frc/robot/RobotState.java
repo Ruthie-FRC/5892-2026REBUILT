@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesHorizontal;
 import frc.robot.util.FieldConstants.LinesVertical;
@@ -18,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.AutoLogOutputManager;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class RobotState {
@@ -40,13 +42,16 @@ public class RobotState {
     if (!autoGoal) {
       return goal;
     }
-    if (topTarget.contains(robotPosition.getTranslation())) {
+    if (AllianceFlipUtil.apply(topTarget).contains(robotPosition.getTranslation())) {
       goal = Goal.RIGHT;
-    } else if (bottomTarget.contains(robotPosition.getTranslation())) {
+    } else if (AllianceFlipUtil.apply(bottomTarget).contains(robotPosition.getTranslation())) {
       goal = Goal.LEFT;
     } else {
       goal = Goal.HUB;
     }
+    Logger.recordOutput("TopTargetCenter", AllianceFlipUtil.apply(topTarget));
+    Logger.recordOutput("BottomTargetCenter", AllianceFlipUtil.apply(bottomTarget));
+
     return goal;
   }
 
