@@ -30,6 +30,7 @@ public abstract class LoggedAnalogInput implements DoubleSupplier {
   public double get() {
     return inputs.value;
   }
+
   @Override
   public double getAsDouble() {
     return get();
