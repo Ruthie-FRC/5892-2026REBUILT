@@ -16,6 +16,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
@@ -190,12 +192,4 @@ public class ShotCalculator {
     CENTER(centerTarget);
     public final Translation2d pose;
   }
-<<<<<<< Updated upstream
-
-  // This should maybe be refactored. It takes an extra loop cycle to actually change the setpoint.
-  public Command setGoalCommand(Goal goal) {
-    return Commands.runOnce(() -> this.goal = goal).ignoringDisable(true);
-  }
-=======
->>>>>>> Stashed changes
 }

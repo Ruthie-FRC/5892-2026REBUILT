@@ -184,7 +184,6 @@ public class RobotContainer {
         .toggleOnTrue(intake.extendCommand())
         .toggleOnFalse(intake.retractCommand());
 
-<<<<<<< Updated upstream
     driveController
         .start()
         .or(coDriveController.start())
@@ -197,30 +196,25 @@ public class RobotContainer {
     driveController
         .x()
         .or(coDriveController.x())
-        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.LEFT));
+        .onTrue(RobotState.getInstance().setGoalCommand(Goal.LEFT));
     driveController
         .b()
         .or(coDriveController.b())
-        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.RIGHT));
+        .onTrue(RobotState.getInstance().setGoalCommand(Goal.RIGHT));
     driveController
         .a()
         .or(coDriveController.a())
-        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.CENTER));
+        .onTrue(RobotState.getInstance().setGoalCommand(Goal.CENTER));
     driveController
         .y()
         .or(coDriveController.y())
-        .onTrue(ShotCalculator.getInstance().setGoalCommand(Goal.HUB));
+        .onTrue(RobotState.getInstance().setGoalCommand(Goal.HUB));
 
     driveController
         .rightStick()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
-=======
-    controller.x().onTrue(RobotState.getInstance().setGoalCommand(Goal.LEFT));
-    controller.b().onTrue(RobotState.getInstance().setGoalCommand(Goal.RIGHT));
-    controller.y().onTrue(RobotState.getInstance().setGoalCommand(Goal.HUB));
->>>>>>> Stashed changes
   }
 
   /**
