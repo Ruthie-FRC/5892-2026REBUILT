@@ -1,9 +1,6 @@
 package frc.robot.util.LoggedAnalogInput;
 
-import frc.robot.util.LoggedDIO.DIOInputsAutoLogged;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class SimAnalogInput extends LoggedAnalogInput {
@@ -21,8 +18,7 @@ public class SimAnalogInput extends LoggedAnalogInput {
   }
 
   public static SimAnalogInput fromNT(String name) {
-    LoggedNetworkNumber networkValue =
-        new LoggedNetworkNumber("/Tuning/simInput/dio" + name, 0);
+    LoggedNetworkNumber networkValue = new LoggedNetworkNumber("/Tuning/simInput/dio" + name, 0);
     return new SimAnalogInput(name, networkValue::get);
   }
 }

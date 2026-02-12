@@ -1,8 +1,5 @@
 package frc.robot.util.LoggedAnalogInput;
 
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 
@@ -10,9 +7,10 @@ import edu.wpi.first.wpilibj.RobotController;
  * Class for reading analog potentiometers. Analog potentiometers read in an analog voltage that
  * corresponds to a position. The position is in whichever units you choose, by way of the scaling
  * and offset constants passed to the constructor.
- * <p>This class is a copy of wpilib's {@link edu.wpi.first.wpilibj.AnalogPotentiometer}</p>
+ *
+ * <p>This class is a copy of wpilib's {@link edu.wpi.first.wpilibj.AnalogPotentiometer}
  */
-public class LoggedPotentiometer  {
+public class LoggedPotentiometer {
   private AnalogInput m_analogInput;
   private boolean m_initAnalogInput;
   private double m_fullRange;
