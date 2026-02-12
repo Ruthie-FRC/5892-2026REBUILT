@@ -32,7 +32,6 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShotCalculator;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -185,6 +184,7 @@ public class RobotContainer {
         .toggleOnTrue(intake.extendCommand())
         .toggleOnFalse(intake.retractCommand());
 
+<<<<<<< Updated upstream
     driveController
         .start()
         .or(coDriveController.start())
@@ -216,6 +216,11 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
+=======
+    controller.x().onTrue(RobotState.getInstance().setGoalCommand(Goal.LEFT));
+    controller.b().onTrue(RobotState.getInstance().setGoalCommand(Goal.RIGHT));
+    controller.y().onTrue(RobotState.getInstance().setGoalCommand(Goal.HUB));
+>>>>>>> Stashed changes
   }
 
   /**
