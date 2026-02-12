@@ -16,15 +16,11 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotState;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesHorizontal;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.Logger;
 
@@ -61,7 +57,6 @@ public class ShotCalculator {
 
   // Cache parameters
   private ShotParameters latestShot = null;
-  @AutoLogOutput @Setter private Goal goal = Goal.HUB;
 
   private static final double minDistance;
   private static final double maxDistance;
@@ -130,7 +125,7 @@ public class ShotCalculator {
                 robotRelativeVelocity.omegaRadiansPerSecond * phaseDelay));
 
     // Calculate distance from turret to target
-    Translation2d target = AllianceFlipUtil.apply(goal.pose);
+    Translation2d target = AllianceFlipUtil.apply(RobotState.getInstance().updateGoal().pose);
     Logger.recordOutput("ShotCalculator/Target", new Pose2d(target, Rotation2d.kZero));
     Pose2d turretPosition = estimatedPose.transformBy(robotToTurret);
     double turretToTargetDistance = target.getDistance(turretPosition.getTranslation());
@@ -194,10 +189,5 @@ public class ShotCalculator {
     RIGHT(rightTarget),
     CENTER(centerTarget);
     public final Translation2d pose;
-  }
-
-  // This should maybe be refactored. It takes an extra loop cycle to actually change the setpoint.
-  public Command setGoalCommand(Goal goal) {
-    return Commands.runOnce(() -> this.goal = goal).ignoringDisable(true);
   }
 }
