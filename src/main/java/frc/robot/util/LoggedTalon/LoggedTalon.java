@@ -154,12 +154,12 @@ public abstract class LoggedTalon<T extends LoggedTalon<T>> {
     this.name = name;
     this.connectionAlerts = new Alert[followers + 1];
     this.connectionAlerts[0] =
-        new Alert("TalonFX" + name + " is not connected", Alert.AlertType.kError);
+        new Alert("Motor " + name + " is not connected", Alert.AlertType.kError);
     if (followers != 0) {
       for (int i = 1; i <= followers; i++) {
         connectionAlerts[i] =
             new Alert(
-                "TalonFX " + name + " follower " + i + " is not connected", Alert.AlertType.kError);
+                "Motor " + name + " follower " + i + " is not connected", Alert.AlertType.kError);
       }
     }
     inputs.torqueCurrentAmps = new double[followers + 1];

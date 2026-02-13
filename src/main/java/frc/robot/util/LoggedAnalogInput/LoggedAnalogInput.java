@@ -5,6 +5,8 @@
 package frc.robot.util.LoggedAnalogInput;
 
 import java.util.function.DoubleSupplier;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -13,6 +15,8 @@ import org.littletonrobotics.junction.Logger;
 @RequiredArgsConstructor
 public abstract class LoggedAnalogInput implements DoubleSupplier {
   private final AnalogInputsAutoLogged inputs = new AnalogInputsAutoLogged();
+
+  @Getter(value = AccessLevel.PROTECTED)
   private final String name;
 
   public void periodic() {
@@ -27,6 +31,11 @@ public abstract class LoggedAnalogInput implements DoubleSupplier {
     double value;
   }
 
+  /**
+   * Get the percentage of this analog channel
+   *
+   * @return the percentage
+   */
   public double get() {
     return inputs.value;
   }

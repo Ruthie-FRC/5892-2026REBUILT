@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degree;
 import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
 import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
 
@@ -36,6 +37,7 @@ import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.LoggedTalon.TalonFX.NoOppTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.PhoenixTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
@@ -60,6 +62,7 @@ public class RobotContainer {
   // Controllers
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController coDriveController = new CommandXboxController(1);
+  private final CommandXboxController testController = new CommandXboxController(2);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -215,6 +218,12 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
+
+    testController.x().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(-180)));
+    testController.a().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(0)));
+    testController.b().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(180)));
+
+
   }
 
   /**

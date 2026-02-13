@@ -4,6 +4,9 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants;
+import frc.robot.util.LoggedAnalogInput.HardwareAnalogInput;
+import frc.robot.util.LoggedAnalogInput.NoOppAnalogInput;
+import frc.robot.util.LoggedAnalogInput.SimAnalogInput;
 import frc.robot.util.LoggedDIO.HardwareDIO;
 import frc.robot.util.LoggedDIO.SimDIO;
 import frc.robot.util.LoggedTalon.Follower.PhoenixTalonFollower;
@@ -13,7 +16,7 @@ import frc.robot.util.LoggedTalon.TalonFX.TalonFXFlywheelSim;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
 import lombok.Getter;
 
-/** Container for shooting bits. This class will initialize the propper IO interfaces. */
+/** Container for shooting bits. This class will initialize the proper IO interfaces. */
 public class Shooter {
   @Getter private final Flywheel flywheel;
   @Getter private final Hood hood;
@@ -38,7 +41,8 @@ public class Shooter {
             new Turret(
                 new PhoenixTalonFX(28, bus, "Turret"),
                 new HardwareDIO("TurretReverse", 2),
-                new HardwareDIO("TurretForward", 3));
+                new HardwareDIO("TurretForward", 3),
+                new HardwareAnalogInput("TurretPot", 0));
       }
       case SIM -> {
         flywheel =
@@ -59,7 +63,8 @@ public class Shooter {
             new Turret(
                 new TalonFXSimpleMotorSim(28, bus, "Turret", 0.0307668163, 1.25),
                 SimDIO.fromNT("TurretReverse"),
-                SimDIO.fromNT("TurretForward"));
+                SimDIO.fromNT("TurretForward"),
+                SimAnalogInput.fromNT("TurretPot"));
       }
       default -> {
         flywheel = new Flywheel(new NoOppTalonFX("Flywheel", 1));
@@ -72,7 +77,8 @@ public class Shooter {
             new Turret(
                 new NoOppTalonFX("Turret", 0),
                 new HardwareDIO("TurretReverse", 2),
-                new HardwareDIO("TurretForward", 3));
+                new HardwareDIO("TurretForward", 3),
+                new NoOppAnalogInput("TurretPot"));
       }
     }
   }
