@@ -58,7 +58,7 @@ import java.util.function.Function;
  *     }
  *     case SIM -> { // Simulate using Phoenix's high fidelity simulation.
  *     // Other options, like FlywheelSim, are availible
- *       subsystem1 = new Subsystem1(new TalonFXSimpleMotorSim(21, canBus, Subsystem1Motor", 0.5, 1));
+ *       subsystem1 = new Subsystem1(new TalonFXSimpleMotorSim(21, canBus, "Subsystem1Motor", 0.5, 1));
  *     }
  *     default -> { // Replay: do nothing
  *       subsystem1 = new Subsystem1(new NoOppTalonFX("Subsystem1Motor", 0));
