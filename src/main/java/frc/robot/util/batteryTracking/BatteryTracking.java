@@ -2,24 +2,22 @@ package frc.robot.util.batteryTracking;
 
 import edu.wpi.first.util.struct.StructBuffer;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.util.PowerUtil;
 import java.time.LocalDateTime;
-import java.util.function.DoubleSupplier;
-import org.littletonrobotics.conduit.ConduitApi;
 import org.littletonrobotics.junction.Logger;
 
-public class BatteryTracking extends SubsystemBase {
+public class BatteryTracking {
   private final Timer writeTimer = new Timer();
   private final Alert readAlert =
       new Alert("Battery has not been read yet", Alert.AlertType.kWarning);
-  private final Alert failedAlert = new Alert("Battery Tracking failed!", Alert.AlertType.kError);
+  private final Alert failedAlert = new Alert("Battery Tracking failed!", AlertType.kWarning);
   private final Alert sameBatteryAlert =
       new Alert("The battery has not been changed since the last match.", Alert.AlertType.kWarning);
   private double batteryUsageAH = 0;
-  private final DoubleSupplier currentSupplier;
 
   private final BatteryTrackingIO io;
   private final BatteryTrackingIO.BatteryTrackingInputs inputs =
@@ -29,15 +27,10 @@ public class BatteryTracking extends SubsystemBase {
 
   private boolean dataProcessed = false;
 
-  public BatteryTracking(BatteryTrackingIO io, DoubleSupplier currentSupplier) {
-    this.currentSupplier = currentSupplier;
+  public BatteryTracking(BatteryTrackingIO io) {
     this.io = io;
     readAlert.set(true);
     writeTimer.start();
-  }
-
-  public BatteryTracking(BatteryTrackingIO io) {
-    this(io, ConduitApi.getInstance()::getPDPTotalCurrent);
   }
 
   public Command writeCommand() {
@@ -49,11 +42,10 @@ public class BatteryTracking extends SubsystemBase {
     io.triggerWrite();
   }
 
-  @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("BatteryTracking", inputs);
-    batteryUsageAH += (currentSupplier.getAsDouble() * (Robot.defaultPeriodSecs / (60 * 60)));
+    batteryUsageAH += (PowerUtil.getCurrent() * (Robot.defaultPeriodSecs / (60 * 60)));
 
     if (inputs.batteryID != -1 && !dataProcessed) {
       dataProcessed = true;

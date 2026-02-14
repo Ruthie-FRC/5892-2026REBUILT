@@ -24,6 +24,7 @@ import frc.robot.util.LoggedTalon.TalonFXS.NoOppTalonFXS;
 import frc.robot.util.LoggedTalon.TalonFXS.PhoenixTalonFXS;
 import frc.robot.util.LoggedTunableMeasure;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.PowerUtil;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
@@ -155,11 +156,14 @@ public abstract class LoggedTalon<T extends LoggedTalon<T>> {
     this.connectionAlerts = new Alert[followers + 1];
     this.connectionAlerts[0] =
         new Alert("Motor " + name + " is not connected", Alert.AlertType.kError);
+    PowerUtil.addCurrentSupplier(this::getPrimarySupplyCurrentAmps);
     if (followers != 0) {
       for (int i = 1; i <= followers; i++) {
         connectionAlerts[i] =
             new Alert(
                 "Motor " + name + " follower " + i + " is not connected", Alert.AlertType.kError);
+        int finalI = i;
+        PowerUtil.addCurrentSupplier(() -> this.getSupplyCurrentAmps(finalI));
       }
     }
     inputs.torqueCurrentAmps = new double[followers + 1];
