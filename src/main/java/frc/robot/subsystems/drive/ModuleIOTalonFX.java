@@ -76,6 +76,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<AngularVelocity> driveVelocity;
   private final StatusSignal<Voltage> driveAppliedVolts;
   private final StatusSignal<Current> driveCurrent;
+  private final StatusSignal<Current> driveSupplyCurrent;
+
 
   // Inputs from turn motor
   private final StatusSignal<Angle> turnAbsolutePosition;
@@ -84,6 +86,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<AngularVelocity> turnVelocity;
   private final StatusSignal<Voltage> turnAppliedVolts;
   private final StatusSignal<Current> turnCurrent;
+  private final StatusSignal<Current> turnSupplyCurrent;
+
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -170,6 +174,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveVelocity = driveTalon.getVelocity();
     driveAppliedVolts = driveTalon.getMotorVoltage();
     driveCurrent = driveTalon.getStatorCurrent();
+    driveSupplyCurrent = driveTalon.getSupplyCurrent();
 
     // Create turn status signals
     turnAbsolutePosition = cancoder.getAbsolutePosition();
@@ -178,6 +183,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnVelocity = turnTalon.getVelocity();
     turnAppliedVolts = turnTalon.getMotorVoltage();
     turnCurrent = turnTalon.getStatorCurrent();
+    turnSupplyCurrent = turnTalon.getSupplyCurrent();
 
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -187,20 +193,25 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
+        driveSupplyCurrent,
         turnAbsolutePosition,
         turnVelocity,
         turnAppliedVolts,
-        turnCurrent);
+        turnCurrent,
+        turnSupplyCurrent);
     // 5892: Optimize CAN
     PhoenixUtil.registerSignals(
         TunerConstants.kCANBus,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
+        driveSupplyCurrent,
         turnAbsolutePosition,
         turnVelocity,
         turnAppliedVolts,
-        turnCurrent);
+        turnCurrent,
+        turnSupplyCurrent
+    );
     ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
   }
 
@@ -209,9 +220,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Refresh all signals
     // 5892 : Optimize CAN
     var driveStatus =
-        BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
+        BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent, driveSupplyCurrent);
     var turnStatus =
-        BaseStatusSignal.isAllGood(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
+        BaseStatusSignal.isAllGood(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent, turnSupplyCurrent);
     var turnEncoderStatus = BaseStatusSignal.isAllGood(turnAbsolutePosition);
 
     // Update drive inputs
@@ -220,6 +231,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
+    inputs.driveSupplyCurrentAmps = driveSupplyCurrent.getValueAsDouble();
 
     // Update turn inputs
     inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus);
@@ -229,6 +241,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+    inputs.turnSupplyCurrentAmps = turnSupplyCurrent.getValueAsDouble();
 
     // Update odometry inputs
     inputs.odometryTimestamps =

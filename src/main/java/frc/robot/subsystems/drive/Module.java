@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.util.PowerUtil;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
@@ -63,6 +64,9 @@ public class Module {
         new LoggedNetworkBoolean("SmartDashboard/Drive/Module" + index + "/Disable", false);
     disableDrive =
         new LoggedNetworkBoolean("SmartDashboard/Drive/Module" + index + "/DisableDrive", false);
+    PowerUtil.addCurrentSupplier(()->inputs.driveCurrentAmps);
+    PowerUtil.addCurrentSupplier(()->inputs.turnCurrentAmps);
+
   }
 
   public void periodic() {
