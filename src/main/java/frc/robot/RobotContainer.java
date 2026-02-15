@@ -37,7 +37,6 @@ import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
-import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.LoggedTalon.TalonFX.NoOppTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.PhoenixTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
@@ -219,11 +218,9 @@ public class RobotContainer {
             DriveCommands.joystickDriveAtAngle(
                 drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
 
-    testController.x().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(-180)));
-    testController.a().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(0)));
-    testController.b().onTrue(shooter.getTurret().gotoPosition(()->Degree.of(180)));
-
-
+    testController.x().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(-180)));
+    testController.a().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(0)));
+    testController.b().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(180)));
   }
 
   /**
