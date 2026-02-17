@@ -78,7 +78,6 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Current> driveCurrent;
   private final StatusSignal<Current> driveSupplyCurrent;
 
-
   // Inputs from turn motor
   private final StatusSignal<Angle> turnAbsolutePosition;
   private final StatusSignal<Angle> turnPosition;
@@ -87,7 +86,6 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Voltage> turnAppliedVolts;
   private final StatusSignal<Current> turnCurrent;
   private final StatusSignal<Current> turnSupplyCurrent;
-
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -210,8 +208,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnVelocity,
         turnAppliedVolts,
         turnCurrent,
-        turnSupplyCurrent
-    );
+        turnSupplyCurrent);
     ParentDevice.optimizeBusUtilizationForAll(driveTalon, turnTalon);
   }
 
@@ -220,9 +217,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     // Refresh all signals
     // 5892 : Optimize CAN
     var driveStatus =
-        BaseStatusSignal.isAllGood(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent, driveSupplyCurrent);
+        BaseStatusSignal.isAllGood(
+            drivePosition, driveVelocity, driveAppliedVolts, driveCurrent, driveSupplyCurrent);
     var turnStatus =
-        BaseStatusSignal.isAllGood(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent, turnSupplyCurrent);
+        BaseStatusSignal.isAllGood(
+            turnPosition, turnVelocity, turnAppliedVolts, turnCurrent, turnSupplyCurrent);
     var turnEncoderStatus = BaseStatusSignal.isAllGood(turnAbsolutePosition);
 
     // Update drive inputs

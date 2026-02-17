@@ -106,7 +106,6 @@ public class ModuleIOSim implements ModuleIO {
     inputs.turnCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
     inputs.turnSupplyCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
 
-
     // Update odometry inputs (50Hz because high-frequency odometry in sim doesn't
     // matter)
     inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};

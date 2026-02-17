@@ -84,7 +84,7 @@ public class Robot extends LoggedRobot {
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
     switch (Constants.currentMode) {
-      case REAL,SIM -> batteryTracking = new BatteryTracking(new BatteryTrackingReal());
+      case REAL, SIM -> batteryTracking = new BatteryTracking(new BatteryTrackingReal());
       default -> batteryTracking = new BatteryTracking(new BatteryTrackingNoOpp());
     }
 

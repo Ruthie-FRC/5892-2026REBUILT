@@ -64,9 +64,8 @@ public class Module {
         new LoggedNetworkBoolean("SmartDashboard/Drive/Module" + index + "/Disable", false);
     disableDrive =
         new LoggedNetworkBoolean("SmartDashboard/Drive/Module" + index + "/DisableDrive", false);
-    PowerUtil.addCurrentSupplier(()->inputs.driveCurrentAmps);
-    PowerUtil.addCurrentSupplier(()->inputs.turnCurrentAmps);
-
+    PowerUtil.addCurrentSupplier(() -> inputs.driveCurrentAmps);
+    PowerUtil.addCurrentSupplier(() -> inputs.turnCurrentAmps);
   }
 
   public void periodic() {
