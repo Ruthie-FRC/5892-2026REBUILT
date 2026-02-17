@@ -61,7 +61,8 @@ public class RobotContainer {
   // Controllers
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController coDriveController = new CommandXboxController(1);
-  private final CommandXboxController testController = new CommandXboxController(2);
+  private final CommandXboxController testController =
+      Constants.tuningMode ? new CommandXboxController(2) : null;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -218,9 +219,14 @@ public class RobotContainer {
             DriveCommands.joystickDriveAtAngle(
                 drive, () -> -driveController.getLeftY(), () -> -driveController.getLeftX()));
 
-    testController.x().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(-180)));
-    testController.a().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(0)));
-    testController.b().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(180)));
+    if (testController != null) {
+      testController.x().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(-120)));
+      testController.a().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(0)));
+      testController.b().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(120)));
+      testController
+          .rightBumper()
+          .onTrue(shooter.getHood().gotoAngle(() -> Rotation2d.fromDegrees(20)));
+    }
   }
 
   /**
