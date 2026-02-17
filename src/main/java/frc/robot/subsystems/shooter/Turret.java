@@ -71,7 +71,7 @@ public class Turret extends SubsystemBase {
   private final MotionMagicTorqueCurrentFOC mmControl = new MotionMagicTorqueCurrentFOC(0);
   private final NeutralOut neutralControl = new NeutralOut();
 
-  /* Variables */
+  /* State */
   private final MutAngle targetPosition = Degrees.mutable(0);
   @AutoLogOutput private final MutAngle potPose = Degrees.mutable(0);
   private boolean positionControl = false;
