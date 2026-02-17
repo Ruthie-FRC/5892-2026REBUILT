@@ -220,8 +220,6 @@ public class Turret extends SubsystemBase {
               .withPosition(targetPosition)
               .withLimitReverseMotion(reverseLimit.get())
               .withLimitForwardMotion(forwardLimit.get()));
-    } else {
-      motor.setControl(neutralControl);
     }
   }
 }

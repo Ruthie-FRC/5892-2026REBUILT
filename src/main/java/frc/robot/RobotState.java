@@ -36,16 +36,16 @@ public class RobotState {
     AutoLogOutputManager.addObject(this);
   }
 
-  @Getter @Setter private boolean autoGoal = true;
+  @Getter @Setter private boolean autoGoal = false;
 
   public Goal updateGoal() {
     if (!autoGoal) {
       return goal;
     }
     if (AllianceFlipUtil.apply(topTarget).contains(robotPosition.getTranslation())) {
-      goal = Goal.RIGHT;
-    } else if (AllianceFlipUtil.apply(bottomTarget).contains(robotPosition.getTranslation())) {
       goal = Goal.LEFT;
+    } else if (AllianceFlipUtil.apply(bottomTarget).contains(robotPosition.getTranslation())) {
+      goal = Goal.RIGHT;
     } else {
       goal = Goal.HUB;
     }
@@ -59,7 +59,7 @@ public class RobotState {
     return Commands.runOnce(() -> setGoal(goal));
   }
 
-  @AutoLogOutput @Getter @Setter private Goal goal;
+  @AutoLogOutput @Getter @Setter private Goal goal = Goal.HUB;
   @Getter @Setter private ChassisSpeeds robotRelativeVelocity = new ChassisSpeeds();
   @Getter @Setter private Pose2d robotPosition = new Pose2d();
 

@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +38,7 @@ import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   /* Hardware */
@@ -45,6 +47,8 @@ public class Hood extends SubsystemBase {
   private final LoggedDIO forwardLimit;
 
   /* Movement Constants */
+  private final LoggedTunableMeasure<MutAngle> downPosition =
+      new LoggedTunableMeasure<>("Hood/DownPosition", Degrees.mutable(18.575));
   private final LoggedTunableMeasure<MutAngle> stowPosition =
       new LoggedTunableMeasure<>("Hood/StowAngle", Degrees.mutable(15));
   public static LoggedTunableNumber stowTrenchGapOffset =
@@ -57,12 +61,14 @@ public class Hood extends SubsystemBase {
   private final LoggedTunableNumber homingConfirmationVoltage =
       new LoggedTunableNumber("Hood/Homing/ConfirmVoltage", 4, "v");
   private final LoggedTunableMeasure<MutAngle> homingSwitchPosition =
-      new LoggedTunableMeasure<>("Hood/Homing/homePosition", Rotations.mutable(0));
+      new LoggedTunableMeasure<>("Hood/Homing/HomePosition", Rotations.mutable(0));
   private final LoggedTunableMeasure<MutAngle> homingConfirmPosition =
-      new LoggedTunableMeasure<>("Hood/Homing/homePosition", Rotations.mutable(0.1));
+      new LoggedTunableMeasure<>("Hood/Homing/ConfirmPosition", Rotations.mutable(0.1));
 
   /* State */
-  @AutoLogOutput private Rotation2d targetPosition = Rotation2d.kZero;
+  /** The target position of the motor. 0 is the hood resting on the turret. */
+  @AutoLogOutput private final MutAngle targetPosition = Degrees.mutable(0);
+
   @AutoLogOutput private boolean positionControl = false;
   @AutoLogOutput @Setter private boolean homed = false;
   @AutoLogOutput @Getter private boolean atSetpoint = false;
@@ -70,7 +76,7 @@ public class Hood extends SubsystemBase {
 
   /* Control  Requests*/
   private final NeutralOut neutralControl = new NeutralOut();
-  private final MotionMagicVoltage mmControl = new MotionMagicVoltage(targetPosition.getMeasure());
+  private final MotionMagicVoltage mmControl = new MotionMagicVoltage(targetPosition);
 
   public Hood(LoggedTalonFX motor, LoggedDIO reverseLimit, LoggedDIO forwardLimit) {
     this.motor = motor;
@@ -101,7 +107,7 @@ public class Hood extends SubsystemBase {
     return run(
         () -> {
           if (homed) {
-            this.requestPosition(ShotCalculator.getInstance().calculateShot().hoodAngle());
+            this.requestAngle(ShotCalculator.getInstance().calculateShot().hoodAngle());
           }
         });
   }
@@ -109,7 +115,7 @@ public class Hood extends SubsystemBase {
   public Command stowCommand() {
     return startEnd(
             () -> {
-              this.requestPosition(new Rotation2d(stowPosition.get()));
+              this.requestAngle(new Rotation2d(stowPosition.get()));
             },
             () -> {})
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
@@ -135,52 +141,60 @@ public class Hood extends SubsystemBase {
   }
 
   /**
-   * A command that requests the turret to move to a position. The command completes imminently,
-   * without waiting for a tolerance to be achieved.
+   * A command that requests the turret to move to a robot-relative angle. The command completes
+   * imminently, without waiting for a tolerance to be achieved.
    *
-   * @param position a supplier of the target position
+   * @param angle a supplier of the target angle. The angle is relative to vertical. 0 is vertical,
+   *     90 is horizontal
    * @return the command
    */
-  public Command requestPosition(Supplier<Rotation2d> position) {
+  public Command requestAngle(Supplier<Rotation2d> angle) {
     return runOnce(
         () -> {
-          requestPosition(position.get());
+          requestAngle(angle.get());
         });
   }
 
-  public void requestPosition(Rotation2d position) {
-    targetPosition = position;
+  /**
+   * @param angle the target angle relative to vertical. 0 is vertical, 90 is horizontal
+   */
+  public void requestAngle(Rotation2d angle) {
+    Logger.recordOutput("Hood/RequestedAngle", angle.getDegrees(), "deg");
+    angleToPosition(angle, targetPosition);
     positionControl = true;
     setControl();
   }
 
   /**
-   * A command that commands the Turret to move to a position. This command ends when the setpoint
-   * is archived
+   * A command that commands the Turret to move to a angle. This command ends when the setpoint is
+   * archived
    *
-   * @param position a supplier of the target position
+   * @param angle a supplier of the target angle. The angle is relative to vertical. 0 is vertical,
+   *     90 is horizontal
    * @return the command
    */
-  public Command gotoPosition(Supplier<Rotation2d> position) {
+  public Command gotoAngle(Supplier<Rotation2d> angle) {
     // I really shouldn't but by creating a functional command I don't create 5 extra objects by
     // separating this out.
     return new FunctionalCommand(
-        () -> requestPosition(position.get()),
+        () -> requestAngle(angle.get()),
         () -> {}, // Nothing to do periodically. Motion is controlled in the periodic function
         (i) -> {},
         () -> atSetpoint,
         this);
   }
 
-  @AutoLogOutput(key = "Hood/ShouldStow")
   public boolean shouldStow() {
+    boolean shouldStow = false;
     final Pose2d pose = RobotState.getInstance().getRobotPosition();
     for (int i = 0; i < trenchAreas.length; i++) {
       if (trenchAreas[i].contains(pose.getTranslation())) {
-        return true;
+        shouldStow = true;
+        break;
       }
     }
-    return false;
+    Logger.recordOutput("Hood/ShouldStow", shouldStow);
+    return shouldStow;
   }
 
   private void updateTrenchAreas() {
@@ -217,7 +231,8 @@ public class Hood extends SubsystemBase {
     motor.periodic();
     reverseLimit.periodic();
     forwardLimit.periodic();
-    atSetpoint = motor.atSetpoint(targetPosition.getMeasure(), tolerance.get());
+    atSetpoint = motor.atSetpoint(targetPosition, tolerance.get());
+    Logger.recordOutput("Hood/Angle", positionToAngle(motor.getPosition()).getDegrees(), "deg");
 
     ShotCalculator.getInstance().clearCache();
     LoggedTunableNumber.ifChanged(this, (value) -> this.updateTrenchAreas(), stowTrenchGapOffset);
@@ -225,15 +240,44 @@ public class Hood extends SubsystemBase {
     setControl();
   }
 
+  /**
+   * Set the control of the motor based on the current {@link #targetPosition}. If {@link
+   * #positionControl} is false, this does nothing. This should be called in every command and the
+   * subsystem periodic to properly apply limit switches
+   */
   private void setControl() {
     if (positionControl) {
       motor.setControl(
           mmControl
-              .withPosition(targetPosition.getMeasure())
+              .withPosition(targetPosition)
               .withLimitReverseMotion(reverseLimit.get())
               .withLimitForwardMotion(forwardLimit.get()));
-    } else {
-      motor.setControl(neutralControl);
     }
+  }
+
+  /**
+   * Converts the robot relative angle to motor position. This is just a helper; would be static if
+   * it didn't use tuned values.
+   *
+   * <p>This is a c style function for them GC savings.
+   *
+   * @param angle the angle to convert, relative to vertical down.
+   * @param positionOut a reference to the position to write to. This is mutated rather than
+   *     returned to save on GC.
+   */
+  private void angleToPosition(Rotation2d angle, MutAngle positionOut) {
+    positionOut.mut_setBaseUnitMagnitude(
+        angle.getRadians() - downPosition.get().baseUnitMagnitude());
+  }
+
+  /**
+   * Converts the motor position to a robot relative angle. This is just a helper; would be static
+   * if it didn't use tuned values.
+   *
+   * @param position the position to convert
+   * @return the angle, relative to vertical down
+   */
+  private Rotation2d positionToAngle(Angle position) {
+    return new Rotation2d(position.baseUnitMagnitude() + downPosition.get().baseUnitMagnitude());
   }
 }
