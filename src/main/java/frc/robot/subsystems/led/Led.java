@@ -65,9 +65,19 @@ public class Led extends SubsystemBase {
       setColor(new RGBWColor(255, 255, 255, 255), 0, 0);
     }
   }
+  public void wrapIndicator(){
+    if(RobotState.getInstance().turretNearWrapPoint){
+      flashTwoColors(0, 0, new RGBWColor(255, 153, 28, 0), new RGBWColor(255, 255, 255, 255));
+    }
+  }
 
   @Override
   public void periodic() {
+    // So the issue I have with this logic is that it will obliviously cycle through booleans
+    // This will flash colors a lot, so we might want to make it so that the colors change based on the LAST change from this list of checks. 
+    hoodIndicator();
+    lockedIndicator();
+    wrapIndicator();    
     // This method will be called once per scheduler run
   }
 }
