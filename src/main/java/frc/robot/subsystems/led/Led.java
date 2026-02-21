@@ -16,11 +16,11 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotState;
+import frc.robot.subsystems.shooter.Hood;
 
 public class Led extends SubsystemBase {
   public static CANdle candle = new CANdle(40);
-
-  public static final Color orange = new Color(255, 25, 0);
 
   /** Creates a new Led. */
   public Led() {
@@ -52,6 +52,20 @@ public class Led extends SubsystemBase {
           Commands.waitSeconds(0.2)
       ).repeatedly();
   }
+  /* Start/end indexes currently omitted bc idk what they control lol */
+  public void hoodIndicator(){
+    if(RobotState.getInstance().shouldStow){
+      flashTwoColors(0, 0, new RGBWColor(255, 0, 0, 0), new RGBWColor(0, 0, 0, 0));
+    }
+  }
+  public void lockedIndicator(){ // When turret at setpoint
+    if(RobotState.getInstance().turretAtSetpoint){
+      setColor(new RGBWColor(255, 153, 28, 0), 0, 0);
+    }else{
+      setColor(new RGBWColor(255, 255, 255, 255), 0, 0);
+    }
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

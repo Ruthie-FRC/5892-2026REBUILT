@@ -37,6 +37,8 @@ public class RobotState {
   }
 
   @Getter @Setter private boolean autoGoal = false;
+  @AutoLogOutput @Getter @Setter public boolean shouldStow = false;
+  @AutoLogOutput @Getter @Setter public boolean turretAtSetpoint = false;
 
   public Goal updateGoal() {
     if (!autoGoal) {
@@ -58,6 +60,7 @@ public class RobotState {
   public Command setGoalCommand(Goal goal) {
     return Commands.runOnce(() -> setGoal(goal));
   }
+
 
   @AutoLogOutput @Getter @Setter private Goal goal = Goal.HUB;
   @Getter @Setter private ChassisSpeeds robotRelativeVelocity = new ChassisSpeeds();

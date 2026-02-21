@@ -210,6 +210,7 @@ public class Turret extends SubsystemBase {
             .transformBy(
                 new Transform3d(
                     turretVisual, new Rotation3d(Degrees.zero(), Degrees.zero(), targetPosition))));
+    RobotState.getInstance().setTurretAtSetpoint(atSetpoint);
   }
 
   private void setControl() {

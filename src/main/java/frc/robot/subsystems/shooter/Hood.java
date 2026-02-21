@@ -193,8 +193,9 @@ public class Hood extends SubsystemBase {
         break;
       }
     }
-    Logger.recordOutput("Hood/ShouldStow", shouldStow);
-    return shouldStow;
+      RobotState.getInstance().setShouldStow(shouldStow);
+      Logger.recordOutput("Hood/ShouldStow", shouldStow);
+      return shouldStow;
   }
 
   private void updateTrenchAreas() {
