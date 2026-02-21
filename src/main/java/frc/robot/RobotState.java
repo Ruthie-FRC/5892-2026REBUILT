@@ -62,7 +62,6 @@ public class RobotState {
     return Commands.runOnce(() -> setGoal(goal));
   }
 
-
   @AutoLogOutput @Getter @Setter private Goal goal = Goal.HUB;
   @Getter @Setter private ChassisSpeeds robotRelativeVelocity = new ChassisSpeeds();
   @Getter @Setter private Pose2d robotPosition = new Pose2d();

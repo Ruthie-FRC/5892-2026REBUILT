@@ -67,7 +67,7 @@ public class Turret extends SubsystemBase {
   private final LoggedTunableMeasure<MutAngle> potRange =
       new LoggedTunableMeasure<MutAngle>("Turret/Pot/Range", Degrees.mutable(-215));
   private final LoggedTunableMeasure<MutAngle> wrapWarningThreshold =
-    new LoggedTunableMeasure<>("Turret/WrapWarningThreshold", Degrees.mutable(10));
+      new LoggedTunableMeasure<>("Turret/WrapWarningThreshold", Degrees.mutable(10));
 
   /* Control Requests */
   private final MotionMagicTorqueCurrentFOC mmControl = new MotionMagicTorqueCurrentFOC(0);
@@ -206,8 +206,10 @@ public class Turret extends SubsystemBase {
 
     double pos = motor.getPosition().baseUnitMagnitude();
     boolean nearWrap =
-      Math.abs(pos - minAngle.get().baseUnitMagnitude()) < wrapWarningThreshold.get().baseUnitMagnitude() ||
-      Math.abs(pos - maxAngle.get().baseUnitMagnitude()) < wrapWarningThreshold.get().baseUnitMagnitude();
+        Math.abs(pos - minAngle.get().baseUnitMagnitude())
+                < wrapWarningThreshold.get().baseUnitMagnitude()
+            || Math.abs(pos - maxAngle.get().baseUnitMagnitude())
+                < wrapWarningThreshold.get().baseUnitMagnitude();
     RobotState.getInstance().setTurretNearWrapPoint(nearWrap);
 
     setControl();
@@ -217,8 +219,7 @@ public class Turret extends SubsystemBase {
             .transformBy(
                 new Transform3d(
                     turretVisual, new Rotation3d(Degrees.zero(), Degrees.zero(), targetPosition))));
-    
-    
+
     RobotState.getInstance().setTurretAtSetpoint(atSetpoint);
   }
 
