@@ -59,21 +59,21 @@ public class Led extends SubsystemBase {
   /* Start/end indexes currently omitted bc idk what they control lol */
   public void hoodIndicator() {
     if (RobotState.getInstance().shouldStow) {
-      flashTwoColors((int)ledStartIndex.get(), (int)ledEndIndex.get(), new RGBWColor(255, 0, 0, 0), new RGBWColor(0, 0, 0, 0));
+      flashTwoColors((int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()), new RGBWColor(255, 0, 0, 0), new RGBWColor(0, 0, 0, 0));
     }
   }
 
   public void lockedIndicator() { // When turret at setpoint
     if (RobotState.getInstance().turretAtSetpoint) {
-      setColor(new RGBWColor(255, 153, 28, 0), (int)ledStartIndex.get(), (int)ledEndIndex.get(),);
+      setColor(new RGBWColor(255, 153, 28, 0), (int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()));
     } else {
-      setColor(new RGBWColor(255, 255, 255, 255), (int)ledStartIndex.get(), (int)ledEndIndex.get(),);
+      setColor(new RGBWColor(255, 255, 255, 255), (int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()));
     }
   }
 
   public void wrapIndicator() {
     if (RobotState.getInstance().turretNearWrapPoint) {
-      flashTwoColors((int)ledStartIndex.get(), (int)ledEndIndex.get(), new RGBWColor(255, 153, 28, 0), new RGBWColor(255, 255, 255, 255));
+      flashTwoColors((int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()), new RGBWColor(255, 153, 28, 0), new RGBWColor(255, 255, 255, 255));
     }
   }
 
