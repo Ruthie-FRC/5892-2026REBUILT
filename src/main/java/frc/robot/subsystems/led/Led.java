@@ -17,14 +17,22 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotState;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.PhoenixUtil;
+import frc.robot.RobotState;
 
 public class Led extends SubsystemBase {
-  private final LoggedTunableNumber ledStartIndex =
-      new LoggedTunableNumber("LED/StartIndex", 0);
-  private final LoggedTunableNumber ledEndIndex =
-      new LoggedTunableNumber("LED/EndIndex", 1);
-  public static CANdle candle = new CANdle(40);
+  private final LoggedTunableNumber ledStartIndex = new LoggedTunableNumber("LED/StartIndex", 0);
+  private final LoggedTunableNumber ledEndIndex = new LoggedTunableNumber("LED/EndIndex", 1);
+  public final CANdle candle = new CANdle(40);
 
+  private final SolidColor solidColor = new SolidColor(
+    (int) Math.round(ledStartIndex.get()),
+    (int) Math.round(ledEndIndex.get()));
+
+  private final RGBWColor redColor = new RGBWColor(255, 0, 0);
+  private final RGBWColor orangeColor = new RGBWColor(255, 153, 28);
+  private final RGBWColor blackColor = new RGBWColor(0, 0, 0);
+  private final RGBWColor whiteColor = new RGBWColor(255, 255, 255);
   /** Creates a new Led. */
   public Led() {
     CANdleConfiguration candleConfiguration =
@@ -32,59 +40,39 @@ public class Led extends SubsystemBase {
             .withLED(
                 new LEDConfigs()
                     .withBrightnessScalar(1)
-                    .withStripType(StripTypeValue.RGBW)
+                    .withStripType(StripTypeValue.GRB)
                     .withLossOfSignalBehavior(LossOfSignalBehaviorValue.KeepRunning));
-    candle.getConfigurator().apply(candleConfiguration);
+    PhoenixUtil.tryUntilOk(5, () -> candle.getConfigurator().apply(candleConfiguration));
   }
 
-  public void setColor(RGBWColor newColor, int startIndex, int endIndex) {
+  public void setColor(RGBWColor newColor) {
     candle.setControl(
-        new SolidColor(startIndex, endIndex) // Controls what LEDS receive color changes
-            .withColor(newColor));
+        solidColor.withColor(newColor));
   }
 
   public void setFlashing(int startIndex, int endIndex) {
     candle.setControl(new StrobeAnimation(startIndex, endIndex));
   }
 
-  public Command flashTwoColors(int startIndex, int endIndex, RGBWColor c1, RGBWColor c2) {
+  public Command flashTwoColors(RGBWColor c1, RGBWColor c2) {
     return Commands.sequence(
-            Commands.runOnce(() -> setColor(c1, startIndex, endIndex), this),
+            Commands.runOnce(() -> setColor(c1), this),
             Commands.waitSeconds(0.2),
-            Commands.runOnce(() -> setColor(c2, startIndex, endIndex), this),
+            Commands.runOnce(() -> setColor(c2), this),
             Commands.waitSeconds(0.2))
         .repeatedly();
   }
 
-  /* Start/end indexes currently omitted bc idk what they control lol */
-  public void hoodIndicator() {
-    if (RobotState.getInstance().shouldStow) {
-      flashTwoColors((int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()), new RGBWColor(255, 0, 0, 0), new RGBWColor(0, 0, 0, 0));
-    }
-  }
-
-  public void lockedIndicator() { // When turret at setpoint
-    if (RobotState.getInstance().turretAtSetpoint) {
-      setColor(new RGBWColor(255, 153, 28, 0), (int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()));
-    } else {
-      setColor(new RGBWColor(255, 255, 255, 255), (int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()));
-    }
-  }
-
-  public void wrapIndicator() {
-    if (RobotState.getInstance().turretNearWrapPoint) {
-      flashTwoColors((int)Math.round(ledStartIndex.get()), (int)Math.round(ledEndIndex.get()), new RGBWColor(255, 153, 28, 0), new RGBWColor(255, 255, 255, 255));
-    }
-  }
-
   @Override
   public void periodic() {
-    // So the issue I have with this logic is that it will obliviously cycle through booleans
-    // This will flash colors a lot, so we might want to make it so that the colors change based on
-    // the LAST change from this list of checks.
-    hoodIndicator();
-    lockedIndicator();
-    wrapIndicator();
-    // This method will be called once per scheduler run
+    if (RobotState.getInstance().shouldStow) {
+      flashTwoColors(redColor, blackColor);
+    } else if(RobotState.getInstance().isTurretNearWrapPoint()) {
+      flashTwoColors(orangeColor, whiteColor);
+    } else if(RobotState.getInstance().isTurretAtSetpoint()) {
+      setColor(orangeColor);
+    } else{
+      setColor(whiteColor);
+    }
   }
 }
