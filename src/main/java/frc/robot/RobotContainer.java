@@ -225,7 +225,12 @@ public class RobotContainer {
       testController.b().onTrue(shooter.getTurret().gotoPosition(() -> Degree.of(120)));
       testController
           .rightBumper()
-          .onTrue(shooter.getHood().gotoAngle(() -> Rotation2d.fromDegrees(20)));
+          .onTrue(shooter.getHood().gotoAngle(() -> Rotation2d.fromDegrees(19)));
+      testController
+          .leftBumper()
+          .onTrue(shooter.getHood().gotoAngle(() -> Rotation2d.fromDegrees(38)));
+      testController.povUp().whileTrue(shooter.getHood().dutyCycleTestCommand(0.1));
+      testController.povDown().whileTrue(shooter.getHood().dutyCycleTestCommand(-0.1));
     }
   }
 

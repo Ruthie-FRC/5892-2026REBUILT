@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotation;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -9,7 +10,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.util.LoggedAnalogInput.LoggedAnalogInput;
 import frc.robot.util.LoggedDIO.LoggedDIO;
@@ -63,12 +65,13 @@ public class Turret extends SubsystemBase {
   private final LoggedTunableMeasure<MutAngle> tolerance =
       new LoggedTunableMeasure<>("Turret/Tolerance", Degrees.mutable(5));
   private final LoggedTunableMeasure<MutAngle> pot0Pose =
-      new LoggedTunableMeasure<MutAngle>("Turret/Pot/0Pose", Degrees.mutable(-215));
+      new LoggedTunableMeasure<MutAngle>("Turret/Pot/0Pose", Degrees.mutable(210.5));
   private final LoggedTunableMeasure<MutAngle> potRange =
-      new LoggedTunableMeasure<MutAngle>("Turret/Pot/Range", Degrees.mutable(-215));
+      new LoggedTunableMeasure<MutAngle>("Turret/Pot/Range", Degrees.mutable(422.865));
 
   /* Control Requests */
-  private final MotionMagicTorqueCurrentFOC mmControl = new MotionMagicTorqueCurrentFOC(0);
+  // TODO: When retuning, use torque control instead
+  private final MotionMagicDutyCycle mmControl = new MotionMagicDutyCycle(0);
   private final NeutralOut neutralControl = new NeutralOut();
 
   /* State */
@@ -85,11 +88,12 @@ public class Turret extends SubsystemBase {
     this.motor = motor;
     this.reverseLimit = reverseLimit.withReversed(true);
     this.forwardLimit = forwardLimit.withReversed(true);
-    this.pot = pot;
+    this.pot = pot.withAverageBits(256);;
 
     var config =
         new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0))
+            .withSlot0(
+                new Slot0Configs().withKP(15).withKI(0).withKD(0).withKS(0.018).withKV(0.085))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(15)
@@ -97,12 +101,18 @@ public class Turret extends SubsystemBase {
             .withMotorOutput(
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
-                    .withInverted(InvertedValue.Clockwise_Positive))
-            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(5))
-            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(15));
+                    .withInverted(InvertedValue.CounterClockwise_Positive))
+            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(10))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(44));
+    // primary: 12:48, 4:1
+    // secondary: 10:110, 11:1
+    // total: 44:1
     motor.withConfig(config).withMMPIDTuning(SlotConfigs.from(config.Slot0), config.MotionMagic);
     setDefaultCommand(aimCommand());
-    SmartDashboard.putData("Turret/SetHomed", setHomed());
+    if (Constants.tuningMode) {
+      // This command directly sets the turret position to 0. It really should never be used ever ever
+      SmartDashboard.putData("Turret/ForceZero", forceZero());
+    }
     // Preload so AdvantageKit can process logging stuff before the match starts.
     ShotCalculator.getInstance().calculateShot();
   }
@@ -138,6 +148,11 @@ public class Turret extends SubsystemBase {
 
   public void updateFromAbsolute() {
     motor.setPosition(potPose);
+    this.homed = true;
+  }
+
+  public Command updateFromAbsoluteCommand() {
+    return runOnce(this::updateFromAbsolute).ignoringDisable(true);
   }
 
   /**
@@ -183,8 +198,13 @@ public class Turret extends SubsystemBase {
         this);
   }
 
-  public Command setHomed() {
-    return runOnce(() -> this.setHomed(true)).ignoringDisable(true);
+  public Command forceZero() {
+    return runOnce(
+            () -> {
+              motor.setPosition(Degrees.of(0));
+              this.setHomed(true);
+            })
+        .ignoringDisable(true);
   }
 
   @Override
@@ -214,7 +234,7 @@ public class Turret extends SubsystemBase {
 
   private void setControl() {
     if (positionControl) {
-      Logger.recordOutput("Turret/Target", targetPosition);
+      Logger.recordOutput("Turret/Target", targetPosition.in(Rotation), "rot");
       motor.setControl(
           mmControl
               .withPosition(targetPosition)
