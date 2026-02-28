@@ -37,6 +37,9 @@ public class RobotState {
   }
 
   @Getter @Setter private boolean autoGoal = false;
+  @Getter @Setter public boolean shouldStow = false;
+  @Getter @Setter public boolean turretAtSetpoint = false;
+  @AutoLogOutput @Getter @Setter public boolean turretNearWrapPoint = false;
 
   public Goal updateGoal() {
     if (!autoGoal) {

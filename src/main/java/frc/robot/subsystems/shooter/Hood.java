@@ -193,6 +193,7 @@ public class Hood extends SubsystemBase {
         break;
       }
     }
+    RobotState.getInstance().setShouldStow(shouldStow);
     Logger.recordOutput("Hood/ShouldStow", shouldStow);
     return shouldStow;
   }
