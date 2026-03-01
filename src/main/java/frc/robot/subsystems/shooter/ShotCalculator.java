@@ -16,6 +16,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import frc.robot.RobotState;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
@@ -69,42 +70,32 @@ public class ShotCalculator {
       new InterpolatingDoubleTreeMap();
 
   static {
-    // TODO: tune turret
-    //  These are stolen from 6328 for testing
-    minDistance = 1.34;
-    maxDistance = 5.60;
-    phaseDelay = 0.03;
+    minDistance = Units.feetToMeters(3 + 2);
+    maxDistance = Units.feetToMeters(13 + 2);;
+    phaseDelay = 0.03; // TODO: untuned
     // These are in degrees from verical
-    shotHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0));
-    shotHoodAngleMap.put(1.78, Rotation2d.fromDegrees(19.0));
-    shotHoodAngleMap.put(2.17, Rotation2d.fromDegrees(24.0));
-    shotHoodAngleMap.put(2.81, Rotation2d.fromDegrees(27.0));
-    shotHoodAngleMap.put(3.82, Rotation2d.fromDegrees(29.0));
-    shotHoodAngleMap.put(4.09, Rotation2d.fromDegrees(30.0));
-    shotHoodAngleMap.put(4.40, Rotation2d.fromDegrees(31.0));
-    shotHoodAngleMap.put(4.77, Rotation2d.fromDegrees(32.0));
-    shotHoodAngleMap.put(5.57, Rotation2d.fromDegrees(32.0));
-    shotHoodAngleMap.put(5.60, Rotation2d.fromDegrees(35.0));
+    shotHoodAngleMap.put(Units.feetToMeters(3 + 2), Rotation2d.fromDegrees(20.0));
+    shotHoodAngleMap.put(Units.feetToMeters(5 + 2), Rotation2d.fromDegrees(30.0));
+    shotHoodAngleMap.put(Units.feetToMeters(7 + 2), Rotation2d.fromDegrees(37.0));
+    shotHoodAngleMap.put(Units.feetToMeters(9 + 2), Rotation2d.fromDegrees(42.0));
+    shotHoodAngleMap.put(Units.feetToMeters(11 + 2), Rotation2d.fromDegrees(42.0));
+    shotHoodAngleMap.put(Units.feetToMeters(13 + 2), Rotation2d.fromDegrees(44.0));
 
-    // Looks like rad per sec, We are actually using Rot Per Sec
-    shotFlywheelSpeedMap.put(1.34, 210.0);
-    shotFlywheelSpeedMap.put(1.78, 220.0);
-    shotFlywheelSpeedMap.put(2.17, 220.0);
-    shotFlywheelSpeedMap.put(2.81, 230.0);
-    shotFlywheelSpeedMap.put(3.82, 250.0);
-    shotFlywheelSpeedMap.put(4.09, 255.0);
-    shotFlywheelSpeedMap.put(4.40, 260.0);
-    shotFlywheelSpeedMap.put(4.77, 265.0);
-    shotFlywheelSpeedMap.put(5.57, 275.0);
-    shotFlywheelSpeedMap.put(5.60, 290.0);
+    // M vs RPS
+    shotFlywheelSpeedMap.put(Units.feetToMeters(3 + 2), 60.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(5 + 2), 64.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(7 + 2), 64.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(9 + 2), 66.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(11 + 2), 72.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(13 + 2), 77.0);
 
+    // TODO: Untuned M vs S
     timeOfFlightMap.put(5.68, 1.16);
     timeOfFlightMap.put(4.55, 1.12);
     timeOfFlightMap.put(3.15, 1.11);
     timeOfFlightMap.put(1.88, 1.09);
     timeOfFlightMap.put(1.38, 0.90);
 
-    AutoLogOutputManager.addObject(getInstance());
   }
 
   public ShotParameters calculateShot() {

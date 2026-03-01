@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants;
 import frc.robot.util.LoggedAnalogInput.HardwareAnalogInput;
@@ -18,6 +19,7 @@ import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
 import frc.robot.util.LoggedTalon.TalonFXS.NoOppTalonFXS;
 import frc.robot.util.LoggedTalon.TalonFXS.PhoenixTalonFXS;
 import frc.robot.util.LoggedTalon.TalonFXS.TalonFXSSimpleMotorSim;
+import java.util.function.DoubleSupplier;
 import lombok.Getter;
 
 /** Container for shooting bits. This class will initialize the proper IO interfaces. */
@@ -77,5 +79,10 @@ public class Shooter {
 
   public ParallelCommandGroup homeCommand() {
     return new ParallelCommandGroup(hood.homingCommand(), turret.updateFromAbsoluteCommand());
+  }
+  public ParallelCommandGroup tuneCommand(DoubleSupplier speed, DoubleSupplier angle) {
+    return new ParallelCommandGroup(
+        flywheel.setpointTestCommand(speed),
+        hood.requestAngle(() -> Rotation2d.fromDegrees(angle.getAsDouble())));
   }
 }

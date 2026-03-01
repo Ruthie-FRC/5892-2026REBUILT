@@ -30,6 +30,7 @@ import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.util.LoggedAnalogInput.LoggedAnalogInput;
 import frc.robot.util.LoggedDIO.LoggedDIO;
+import frc.robot.util.LoggedDIO.SimDIO;
 import frc.robot.util.LoggedTalon.TalonFX.LoggedTalonFX;
 import frc.robot.util.LoggedTunableMeasure;
 import frc.robot.util.LoggedTunableNumber;
@@ -88,10 +89,10 @@ public class Turret extends SubsystemBase {
   public Turret(
       LoggedTalonFX motor, LoggedDIO reverseLimit, LoggedDIO forwardLimit, LoggedAnalogInput pot) {
     this.motor = motor;
-    this.reverseLimit = reverseLimit.withReversed(true);
-    this.forwardLimit = forwardLimit.withReversed(true);
+    //TODO: Remove limits
+    this.reverseLimit = new SimDIO("Turret/ReverseLimit", () -> false);
+    this.forwardLimit = new SimDIO("Turret/ForwardLimit", () -> false);
     this.pot = pot.withAverageBits(256);
-    ;
 
     var config =
         new TalonFXConfiguration()

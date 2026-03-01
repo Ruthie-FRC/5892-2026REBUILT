@@ -63,7 +63,7 @@ public class Hood extends SubsystemBase {
   @AutoLogOutput private final MutAngle targetPosition = Degrees.mutable(0);
 
   @AutoLogOutput private boolean positionControl = false;
-  @AutoLogOutput @Setter private boolean homed = false;
+  @AutoLogOutput @Setter private boolean homed = true;
   @AutoLogOutput @Getter private boolean atSetpoint = false;
   @AutoLogOutput private Rectangle2d[] trenchAreas = new Rectangle2d[4];
 
@@ -79,7 +79,7 @@ public class Hood extends SubsystemBase {
         new TalonFXSConfiguration()
             .withCommutation(
                 new CommutationConfigs().withMotorArrangement(MotorArrangementValue.Minion_JST))
-            .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0))
+            .withSlot0(new Slot0Configs().withKP(14).withKI(0).withKD(0).withKS(0.017).withKV(0.2))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(15)

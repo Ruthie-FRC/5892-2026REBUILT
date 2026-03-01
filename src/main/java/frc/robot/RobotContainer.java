@@ -42,6 +42,7 @@ import frc.robot.util.LoggedTalon.TalonFX.NoOppTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.PhoenixTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -234,6 +235,12 @@ public class RobotContainer {
           .onTrue(shooter.getHood().gotoAngle(() -> Rotation2d.fromDegrees(38)));
       testController.povUp().whileTrue(shooter.getHood().dutyCycleTestCommand(0.1));
       testController.povDown().whileTrue(shooter.getHood().dutyCycleTestCommand(-0.1));
+      testController
+          .y()
+          .whileTrue(
+              shooter.tuneCommand(
+                  new LoggedNetworkNumber("/Tuning/SpeedRPS", 0),
+                  new LoggedNetworkNumber("/Tuning/HoodAngle", 18.575)));
     }
   }
 
