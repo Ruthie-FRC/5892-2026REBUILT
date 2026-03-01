@@ -32,6 +32,7 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.led.Led;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
@@ -57,6 +58,7 @@ public class RobotContainer {
 
   private final Indexer indexer;
   private final Shooter shooter;
+  private final Led led;
 
   // Controllers
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -128,6 +130,7 @@ public class RobotContainer {
     }
     indexer = new Indexer(rioCAN);
     shooter = new Shooter(rioCAN);
+    led = new Led();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
