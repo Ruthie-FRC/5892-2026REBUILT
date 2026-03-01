@@ -80,6 +80,7 @@ public class Shooter {
   public ParallelCommandGroup homeCommand() {
     return new ParallelCommandGroup(hood.homingCommand(), turret.updateFromAbsoluteCommand());
   }
+
   public ParallelCommandGroup tuneCommand(DoubleSupplier speed, DoubleSupplier angle) {
     return new ParallelCommandGroup(
         flywheel.setpointTestCommand(speed),

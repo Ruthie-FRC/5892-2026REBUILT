@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotation;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -66,11 +67,13 @@ public class Turret extends SubsystemBase {
   private final LoggedTunableMeasure<MutAngle> tolerance =
       new LoggedTunableMeasure<>("Turret/Tolerance", Degrees.mutable(5));
   private final LoggedTunableMeasure<MutAngle> pot0Pose =
-      new LoggedTunableMeasure<MutAngle>("Turret/Pot/0Pose", Degrees.mutable(210.5));
+      new LoggedTunableMeasure<MutAngle>("Turret/Pot/0Pose", Degrees.mutable(220));
   private final LoggedTunableMeasure<MutAngle> potRange =
-      new LoggedTunableMeasure<MutAngle>("Turret/Pot/Range", Degrees.mutable(422.865));
+      new LoggedTunableMeasure<MutAngle>("Turret/Pot/Range", Degrees.mutable(423.817787419));
   private final LoggedTunableMeasure<MutAngle> wrapWarningThreshold =
       new LoggedTunableMeasure<>("Turret/WrapWarningThreshold", Degrees.mutable(10));
+  private final LoggedTunableMeasure<MutAngle> offset =
+      new LoggedTunableMeasure<MutAngle>("Turret/Offset", Degrees.mutable(48.4));
 
   /* Control Requests */
   // TODO: When retuning, use torque control instead
@@ -89,7 +92,7 @@ public class Turret extends SubsystemBase {
   public Turret(
       LoggedTalonFX motor, LoggedDIO reverseLimit, LoggedDIO forwardLimit, LoggedAnalogInput pot) {
     this.motor = motor;
-    //TODO: Remove limits
+    // TODO: Remove limits
     this.reverseLimit = new SimDIO("Turret/ReverseLimit", () -> false);
     this.forwardLimit = new SimDIO("Turret/ForwardLimit", () -> false);
     this.pot = pot.withAverageBits(256);
@@ -112,7 +115,7 @@ public class Turret extends SubsystemBase {
     // secondary: 10:110, 11:1
     // total: 44:1
     motor.withConfig(config).withMMPIDTuning(SlotConfigs.from(config.Slot0), config.MotionMagic);
-    setDefaultCommand(aimCommand());
+    // setDefaultCommand(aimCommand());
     if (Constants.tuningMode) {
       // This command directly sets the turret position to 0. It really should never be used ever
       // ever
@@ -127,7 +130,10 @@ public class Turret extends SubsystemBase {
         () -> {
           if (homed) {
             this.requestPosition(
-                ShotCalculator.getInstance().calculateShot().turretAngle().getMeasure());
+                Radians.of(
+                    MathUtil.angleModulus(
+                        ShotCalculator.getInstance().calculateShot().turretAngle().getRadians()
+                            + offset.get().baseUnitMagnitude())));
           }
         });
   }

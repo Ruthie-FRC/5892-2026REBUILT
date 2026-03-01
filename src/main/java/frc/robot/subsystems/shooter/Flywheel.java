@@ -7,7 +7,6 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TorqueCurrentConfigs;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -24,8 +23,7 @@ public class Flywheel extends SubsystemBase {
 
   private final LoggedTalonFX motor;
 
-  private final VelocityTorqueCurrentFOC control =
-      new VelocityTorqueCurrentFOC(0);
+  private final VelocityTorqueCurrentFOC control = new VelocityTorqueCurrentFOC(0);
   @Getter @AutoLogOutput private boolean atSetpoint = false;
   private final LoggedTunableMeasure<MutAngularVelocity> tolerance =
       new LoggedTunableMeasure<>("Flywheel/Tolerance", RPM.mutable(5));
@@ -49,13 +47,14 @@ public class Flywheel extends SubsystemBase {
                     .withKS(1.5)
                     .withKV(0.05)
                     .withKA(0));
-    motor.withConfig(config).withPIDTunable(config.Slot0);
-    setDefaultCommand(aimCommand());
+    // motor.withConfig(config).withPIDTunable(config.Slot0);
+    // setDefaultCommand(aimCommand());
   }
 
   public void setSetpoint(AngularVelocity velocity) {
     motor.setControl(control.withVelocity(velocity));
   }
+
   public Command setpointTestCommand(DoubleSupplier velocityRPS) {
     return runEnd(
         () -> motor.setControl(control.withVelocity(velocityRPS.getAsDouble())),

@@ -22,7 +22,6 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.FieldConstants;
 import frc.robot.util.FieldConstants.LinesHorizontal;
 import lombok.RequiredArgsConstructor;
-import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.Logger;
 
 /** Thank you so much 6328! */
@@ -71,7 +70,8 @@ public class ShotCalculator {
 
   static {
     minDistance = Units.feetToMeters(3 + 2);
-    maxDistance = Units.feetToMeters(13 + 2);;
+    maxDistance = Units.feetToMeters(13 + 2);
+    ;
     phaseDelay = 0.03; // TODO: untuned
     // These are in degrees from verical
     shotHoodAngleMap.put(Units.feetToMeters(3 + 2), Rotation2d.fromDegrees(20.0));
@@ -95,7 +95,6 @@ public class ShotCalculator {
     timeOfFlightMap.put(3.15, 1.11);
     timeOfFlightMap.put(1.88, 1.09);
     timeOfFlightMap.put(1.38, 0.90);
-
   }
 
   public ShotParameters calculateShot() {
@@ -151,11 +150,7 @@ public class ShotCalculator {
 
     // Calculate parameters accounted for imparted velocity
     turretAngle =
-        target
-            .minus(lookaheadPose.getTranslation())
-            .getAngle()
-            .minus(lookaheadPose.getRotation())
-            .plus(Rotation2d.k180deg);
+        target.minus(lookaheadPose.getTranslation()).getAngle().minus(lookaheadPose.getRotation());
     hoodAngle = shotHoodAngleMap.get(lookaheadTurretToTargetDistance);
     latestShot =
         new ShotParameters(

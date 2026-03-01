@@ -18,21 +18,20 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotState;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PhoenixUtil;
-import frc.robot.RobotState;
 
 public class Led extends SubsystemBase {
   private final LoggedTunableNumber ledStartIndex = new LoggedTunableNumber("LED/StartIndex", 0);
   private final LoggedTunableNumber ledEndIndex = new LoggedTunableNumber("LED/EndIndex", 1);
   public final CANdle candle = new CANdle(40);
 
-  private final SolidColor solidColor = new SolidColor(
-    (int) Math.round(ledStartIndex.get()),
-    (int) Math.round(ledEndIndex.get()));
+  private final SolidColor solidColor =
+      new SolidColor((int) Math.round(ledStartIndex.get()), (int) Math.round(ledEndIndex.get()));
 
   private final RGBWColor redColor = new RGBWColor(255, 0, 0);
   private final RGBWColor orangeColor = new RGBWColor(255, 153, 28);
   private final RGBWColor blackColor = new RGBWColor(0, 0, 0);
   private final RGBWColor whiteColor = new RGBWColor(255, 255, 255);
+
   /** Creates a new Led. */
   public Led() {
     CANdleConfiguration candleConfiguration =
@@ -46,8 +45,7 @@ public class Led extends SubsystemBase {
   }
 
   public void setColor(RGBWColor newColor) {
-    candle.setControl(
-        solidColor.withColor(newColor));
+    candle.setControl(solidColor.withColor(newColor));
   }
 
   public void setFlashing(int startIndex, int endIndex) {
@@ -67,11 +65,11 @@ public class Led extends SubsystemBase {
   public void periodic() {
     if (RobotState.getInstance().shouldStow) {
       flashTwoColors(redColor, blackColor);
-    } else if(RobotState.getInstance().isTurretNearWrapPoint()) {
+    } else if (RobotState.getInstance().isTurretNearWrapPoint()) {
       flashTwoColors(orangeColor, whiteColor);
-    } else if(RobotState.getInstance().isTurretAtSetpoint()) {
+    } else if (RobotState.getInstance().isTurretAtSetpoint()) {
       setColor(orangeColor);
-    } else{
+    } else {
       setColor(whiteColor);
     }
   }
