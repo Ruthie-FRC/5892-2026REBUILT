@@ -76,6 +76,6 @@ public class Shooter {
   }
 
   public ParallelCommandGroup homeCommand() {
-    return new ParallelCommandGroup(/*hood.homingCommand(),*/ turret.homingCommand());
+    return new ParallelCommandGroup(hood.homingCommand(), turret.updateFromAbsoluteCommand());
   }
 }

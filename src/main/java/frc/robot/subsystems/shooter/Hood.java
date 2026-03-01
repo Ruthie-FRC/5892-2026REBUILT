@@ -1,7 +1,6 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CommutationConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -125,11 +124,23 @@ public class Hood extends SubsystemBase {
   }
 
   // TODO: Create a real homing sequence w/ sensorless homing
-  // public Command homingCommand() {
-  //   return new FunctionalCommand(()->{this.positionControl=false;
-  //     motor.setControl(dutyCycleOut.withOutput(0));
-  //   }, ()->{}), null, null, null)
-  // }
+  public Command homingCommand() {
+    return new FunctionalCommand(
+        () -> {
+          this.positionControl = false;
+          motor.setControl(dutyCycleOut.withOutput(homingDutyCycle.get()));
+        },
+        () -> {},
+        (i) -> {
+          motor.setControl(dutyCycleOut.withOutput(0));
+          if (!i) {
+            setHomed(true);
+            motor.setPosition(Degrees.of(0));
+          }
+        },
+        () -> motor.getPrimaryTorqueCurrentAmps() >= homingCurrentThreshold.get(),
+        this);
+  }
 
   /**
    * A command that requests the turret to move to a robot-relative angle. The command completes
