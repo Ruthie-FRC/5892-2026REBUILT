@@ -51,16 +51,12 @@ public class Hood extends SubsystemBase {
   public static LoggedTunableNumber stowTrenchGapOffset =
       new LoggedTunableNumber("Hood/stowTrenchGapOffset", 0, "m");
   private final LoggedTunableMeasure<MutAngle> tolerance =
-      new LoggedTunableMeasure<>("Hood/Tolerance", Degrees.mutable(5));
+      new LoggedTunableMeasure<>("Hood/Tolerance", Degrees.mutable(2));
   /* Homing */
-  private final LoggedTunableNumber homingVoltage =
-      new LoggedTunableNumber("Hood/Homing/Voltage", 4, "v");
-  private final LoggedTunableNumber homingConfirmationVoltage =
-      new LoggedTunableNumber("Hood/Homing/ConfirmVoltage", 4, "v");
-  private final LoggedTunableMeasure<MutAngle> homingSwitchPosition =
-      new LoggedTunableMeasure<>("Hood/Homing/HomePosition", Rotations.mutable(0));
-  private final LoggedTunableMeasure<MutAngle> homingConfirmPosition =
-      new LoggedTunableMeasure<>("Hood/Homing/ConfirmPosition", Rotations.mutable(0.1));
+  private final LoggedTunableNumber homingDutyCycle =
+      new LoggedTunableNumber("Hood/Homing/DutyCycle", -0.1, "%");
+  private final LoggedTunableNumber homingCurrentThreshold =
+      new LoggedTunableNumber("Hood/Homing/CurrentThreshold", 10, "A");
 
   /* State */
   /** The target position of the motor. 0 is the hood resting on the turret. */

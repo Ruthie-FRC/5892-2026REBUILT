@@ -88,7 +88,8 @@ public class Turret extends SubsystemBase {
     this.motor = motor;
     this.reverseLimit = reverseLimit.withReversed(true);
     this.forwardLimit = forwardLimit.withReversed(true);
-    this.pot = pot.withAverageBits(256);;
+    this.pot = pot.withAverageBits(256);
+    ;
 
     var config =
         new TalonFXConfiguration()
@@ -110,7 +111,8 @@ public class Turret extends SubsystemBase {
     motor.withConfig(config).withMMPIDTuning(SlotConfigs.from(config.Slot0), config.MotionMagic);
     setDefaultCommand(aimCommand());
     if (Constants.tuningMode) {
-      // This command directly sets the turret position to 0. It really should never be used ever ever
+      // This command directly sets the turret position to 0. It really should never be used ever
+      // ever
       SmartDashboard.putData("Turret/ForceZero", forceZero());
     }
     // Preload so AdvantageKit can process logging stuff before the match starts.
