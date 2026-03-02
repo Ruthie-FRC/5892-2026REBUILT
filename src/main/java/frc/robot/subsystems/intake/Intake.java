@@ -6,11 +6,11 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Rotation;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,10 +21,11 @@ import frc.robot.util.LoggedTunableNumber;
 public class Intake extends SubsystemBase {
   private final LoggedTalonFX rollerMotor;
   private final LoggedTalonFX slapDownMotor;
-  private final LoggedTunableNumber rollerSpeed =
-      new LoggedTunableNumber("Intake/RollerSpeed", 1);
+  private final LoggedTunableNumber rollerSpeed = new LoggedTunableNumber("Intake/RollerSpeed", 1);
   private final LoggedTunableMeasure<MutAngle> outPosition =
       new LoggedTunableMeasure<>("Intake/OutPosition", Rotation.mutable(0.5));
+  private final LoggedTunableNumber extendOuttakeSpeed =
+      new LoggedTunableNumber("Intake/ExtendOuttakeSpeed", 0.1);
   private final LoggedTunableMeasure<MutAngle> inPosition =
       new LoggedTunableMeasure<>("Intake/InPosition", Rotation.mutable(0));
   private final LoggedTunableMeasure<MutAngle> tolerance =
@@ -37,13 +38,16 @@ public class Intake extends SubsystemBase {
   public Intake(LoggedTalonFX rollerMotor, LoggedTalonFX slapDownMotor) {
     this.rollerMotor = rollerMotor.withConfig(LoggedTalonFX.buildStandardConfig(20, 20));
     var slapDownConfig =
-        LoggedTalonFX.buildStandardConfig(20, 20, NeutralModeValue.Brake)
+        LoggedTalonFX.buildStandardConfig(40, 20)
             .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicAcceleration(2)
-                    .withMotionMagicCruiseVelocity(5));
+                    .withMotionMagicCruiseVelocity(5))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(34.5));
     this.slapDownMotor = slapDownMotor.withConfig(slapDownConfig).withMMPIDTuning(slapDownConfig);
+
+    setDefaultCommand(retractForeverCommand());
   }
 
   public Command intakeCommand() {
@@ -54,20 +58,30 @@ public class Intake extends SubsystemBase {
 
   public Command extendCommand() {
     return startEnd(
-            () -> slapDownMotor.setControl(mmOut.withPosition(this.outPosition.get())), () -> {})
+            () -> {
+              slapDownMotor.setControl(mmOut.withPosition(this.outPosition.get()));
+              rollerMotor.setControl(dutyCycleOut.withOutput(extendOuttakeSpeed.get()));
+            },
+            () -> {
+              rollerMotor.setControl(dutyCycleOut.withOutput(0));
+            })
         .until(() -> slapDownMotor.atSetpoint(outPosition.get(), tolerance.get()));
   }
 
-  public Command retractCommand() {
+  public Command retractForeverCommand() {
     return startEnd(
             () -> slapDownMotor.setControl(mmOut.withPosition(this.inPosition.get())), () -> {})
         .until(() -> slapDownMotor.atSetpoint(inPosition.get(), tolerance.get()));
   }
 
+  public Command retractCommand() {
+    return startEnd(
+        () -> slapDownMotor.setControl(mmOut.withPosition(this.inPosition.get())), () -> {});
+  }
+
   public Command intakeSequence() {
     return extendCommand().andThen(intakeCommand());
   }
-
 
   @Override
   public void periodic() {

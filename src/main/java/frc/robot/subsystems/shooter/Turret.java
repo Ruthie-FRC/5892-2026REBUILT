@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.util.LoggedAnalogInput.LoggedAnalogInput;
@@ -123,6 +124,8 @@ public class Turret extends SubsystemBase {
     }
     // Preload so AdvantageKit can process logging stuff before the match starts.
     ShotCalculator.getInstance().calculateShot();
+
+    RobotModeTriggers.disabled().onTrue(updateFromAbsoluteCommand());
   }
 
   public Command aimCommand() {

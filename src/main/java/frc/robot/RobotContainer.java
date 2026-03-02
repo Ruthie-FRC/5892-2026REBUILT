@@ -32,7 +32,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.led.Led;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
@@ -59,7 +58,7 @@ public class RobotContainer {
 
   private final Indexer indexer;
   private final Shooter shooter;
-  private final Led led;
+  //   private final Led led;
 
   // Controllers
   private final CommandXboxController driveController = new CommandXboxController(0);
@@ -131,7 +130,7 @@ public class RobotContainer {
     }
     indexer = new Indexer(rioCAN);
     shooter = new Shooter(rioCAN);
-    led = new Led();
+    // led = new Led();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -188,8 +187,7 @@ public class RobotContainer {
     driveController
         .leftBumper()
         .or(coDriveController.leftBumper())
-        .toggleOnTrue(intake.extendCommand())
-        .toggleOnFalse(intake.retractCommand());
+        .toggleOnTrue(intake.intakeSequence());
 
     driveController
         .start()
@@ -241,6 +239,7 @@ public class RobotContainer {
               shooter.tuneCommand(
                   new LoggedNetworkNumber("/Tuning/SpeedRPS", 0),
                   new LoggedNetworkNumber("/Tuning/HoodAngle", 18.575)));
+      testController.start().whileTrue(shooter.homeCommand());
     }
   }
 

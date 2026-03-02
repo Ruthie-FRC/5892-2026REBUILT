@@ -8,8 +8,8 @@ import frc.robot.util.RollerSubsystem;
 public class Spindexer extends RollerSubsystem {
   public Spindexer(LoggedTalonFX motor) {
     super(
-        motor.withConfig(LoggedTalonFX.buildStandardConfig(40, 40, NeutralModeValue.Brake)),
-        new LoggedTunableNumber("Spindexer/Speed", 0.5),
+        motor.withConfig(LoggedTalonFX.buildStandardConfig(80, 60, NeutralModeValue.Coast)),
+        new LoggedTunableNumber("Spindexer/Speed", -1),
         new LoggedTunableNumber("Spindexer/UnjamSpeed", 0.25));
   }
 }
