@@ -8,8 +8,8 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,8 +21,8 @@ import frc.robot.util.LoggedTunableNumber;
 public class Intake extends SubsystemBase {
   private final LoggedTalonFX rollerMotor;
   private final LoggedTalonFX slapDownMotor;
-  private final LoggedTunableNumber tunedVoltage =
-      new LoggedTunableNumber("Intake/RollerVoltage", 2);
+  private final LoggedTunableNumber rollerSpeed =
+      new LoggedTunableNumber("Intake/RollerSpeed", 1);
   private final LoggedTunableMeasure<MutAngle> outPosition =
       new LoggedTunableMeasure<>("Intake/OutPosition", Rotation.mutable(0.5));
   private final LoggedTunableMeasure<MutAngle> inPosition =
@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
   private final LoggedTunableMeasure<MutAngle> tolerance =
       new LoggedTunableMeasure<>("Intake/Tolerance", Rotation.mutable(0.05));
 
-  private final VoltageOut voltageOut = new VoltageOut(tunedVoltage.get()).withEnableFOC(true);
+  private final DutyCycleOut dutyCycleOut = new DutyCycleOut(rollerSpeed.get()).withEnableFOC(true);
   private final MotionMagicTorqueCurrentFOC mmOut = new MotionMagicTorqueCurrentFOC(0);
 
   /** Creates a new Intake. */
@@ -48,8 +48,8 @@ public class Intake extends SubsystemBase {
 
   public Command intakeCommand() {
     return startEnd(
-        () -> rollerMotor.setControl(voltageOut.withOutput(tunedVoltage.get())),
-        () -> rollerMotor.setControl(voltageOut.withOutput(0)));
+        () -> rollerMotor.setControl(dutyCycleOut.withOutput(rollerSpeed.get())),
+        () -> rollerMotor.setControl(dutyCycleOut.withOutput(0)));
   }
 
   public Command extendCommand() {
@@ -68,7 +68,6 @@ public class Intake extends SubsystemBase {
     return extendCommand().andThen(intakeCommand());
   }
 
-  // Everywhere constant is referenced use tunable number instead
 
   @Override
   public void periodic() {
