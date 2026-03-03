@@ -8,8 +8,9 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degree;
-import static frc.robot.subsystems.vision.VisionConstants.camera0Name;
-import static frc.robot.subsystems.vision.VisionConstants.camera1Name;
+import static frc.robot.subsystems.vision.VisionConstants.cameraBackName;
+import static frc.robot.subsystems.vision.VisionConstants.cameraLeftName;
+import static frc.robot.subsystems.vision.VisionConstants.cameraRightName;
 
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -35,11 +36,13 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.util.LoggedTalon.TalonFX.NoOppTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.PhoenixTalonFX;
 import frc.robot.util.LoggedTalon.TalonFX.TalonFXSimpleMotorSim;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -86,8 +89,9 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+                new VisionIOPhotonVision(cameraBackName, VisionConstants.robotToCameraBack),
+                new VisionIOPhotonVision(cameraLeftName, VisionConstants.robotToCameraLeft),
+                new VisionIOPhotonVision(cameraRightName, VisionConstants.robotToCameraRight));
         intake =
             new Intake(
                 new PhoenixTalonFX(30, rioCAN, "IntakeRoller"),
@@ -103,7 +107,16 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
+        Logger.recordOutput("Vision/Offsets/" + cameraBackName, VisionConstants.robotToCameraBack);
+        Logger.recordOutput("Vision/Offsets/" + cameraLeftName, VisionConstants.robotToCameraLeft);
+        Logger.recordOutput(
+            "Vision/Offsets/" + cameraRightName, VisionConstants.robotToCameraRight);
         // new Vision(
         //     drive::addVisionMeasurement,
         //     new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
@@ -123,7 +136,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
 
         intake = new Intake(new NoOppTalonFX("IntakeRoller", 0), new NoOppTalonFX("IntakeSlap", 0));
         break;

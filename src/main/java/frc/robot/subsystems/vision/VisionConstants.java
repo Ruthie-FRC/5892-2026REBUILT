@@ -19,19 +19,31 @@ public class VisionConstants {
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
   // Camera names, must match names configured on coprocessor
-  public static String camera0Name = "back";
-  public static String camera1Name = "camera_1";
+  public static String cameraBackName = "back";
+  public static String cameraLeftName = "left";
+  public static String cameraRightName = "right";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
-  public static Transform3d robotToCamera0 =
+  public static Transform3d robotToCameraBack =
       new Transform3d(
           Units.inchesToMeters(-13.4375),
           Units.inchesToMeters(1 + 1 / 8),
           Units.inchesToMeters(15 + (9 / 16)),
           new Rotation3d(0.0, 0, Units.degreesToRadians(180)));
-  public static Transform3d robotToCamera1 =
-      new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+  public static Transform3d robotToCameraLeft =
+      new Transform3d(
+          Units.inchesToMeters((-27.5 / 2) /* frame edge */ + (3 + (1 / 4)) /* in */),
+          Units.inchesToMeters((27.5 / 2) /* frame edge */ - (2 + (9 / 16)) /* in */),
+          Units.inchesToMeters(7 + (15 / 16) /* up */),
+          new Rotation3d(
+              0.0, Units.degreesToRadians(-23.05 /* pitch up */), Units.degreesToRadians(90)));
+  public static Transform3d robotToCameraRight =
+      new Transform3d(
+          Units.inchesToMeters((-27 / 2) + (2 / 10)),
+          Units.inchesToMeters((-27.5 / 2) + 8 + (3 / 4)),
+          Units.inchesToMeters(6 + (7 / 16) + 1 + (5 / 8)),
+          new Rotation3d(0.0, Units.degreesToRadians(-3.9), Units.degreesToRadians(-90)));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
@@ -60,3 +72,15 @@ public class VisionConstants {
 // 15 9/16 from the ground
 // 1 1/8 to robot left
 // 1/16 in from frame = -13.4375
+
+// Right Camera
+// 3 1/4 from back
+// 2 9/16 from right frame
+// 7 15/16 up
+// 34.05 pitch
+// 27.5 frame
+
+// Left Camera
+// 6 7/16 + 1 5/8 from the ground
+// 8 3/4 from back big edge (27.5)
+// 2/10 from edge, 27/2 - 2/10
