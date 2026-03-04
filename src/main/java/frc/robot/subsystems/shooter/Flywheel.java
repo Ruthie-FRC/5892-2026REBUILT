@@ -47,8 +47,8 @@ public class Flywheel extends SubsystemBase {
                     .withKS(1.5)
                     .withKV(0.05)
                     .withKA(0));
-    // motor.withConfig(config).withPIDTunable(config.Slot0);
-    // setDefaultCommand(aimCommand());
+    motor.withConfig(config).withPIDTunable(config.Slot0);
+    setDefaultCommand(aimCommand());
   }
 
   public void setSetpoint(AngularVelocity velocity) {

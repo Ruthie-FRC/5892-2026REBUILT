@@ -126,6 +126,8 @@ public class Turret extends SubsystemBase {
     ShotCalculator.getInstance().calculateShot();
 
     RobotModeTriggers.disabled().onTrue(updateFromAbsoluteCommand());
+
+    setDefaultCommand(aimCommand());
   }
 
   public Command aimCommand() {
