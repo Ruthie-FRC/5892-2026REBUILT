@@ -10,7 +10,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,20 +23,20 @@ public class Intake extends SubsystemBase {
   private final LoggedTalonFX slapDownMotor;
   private final LoggedTunableNumber rollerSpeed = new LoggedTunableNumber("Intake/RollerSpeed", 1);
   private final LoggedTunableMeasure<MutAngle> outPosition =
-      new LoggedTunableMeasure<>("Intake/OutPosition", Rotation.mutable(0.5));
+      new LoggedTunableMeasure<>("Intake/OutPosition", Rotation.mutable(-0.6521));
   private final LoggedTunableNumber extendOuttakeSpeed =
-      new LoggedTunableNumber("Intake/ExtendOuttakeSpeed", 0.1);
+      new LoggedTunableNumber("Intake/ExtendOuttakeSpeed", -0.1);
   private final LoggedTunableMeasure<MutAngle> inPosition =
       new LoggedTunableMeasure<>("Intake/InPosition", Rotation.mutable(0));
   private final LoggedTunableMeasure<MutAngle> tolerance =
       new LoggedTunableMeasure<>("Intake/Tolerance", Rotation.mutable(0.05));
 
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(rollerSpeed.get()).withEnableFOC(true);
-  private final MotionMagicTorqueCurrentFOC mmOut = new MotionMagicTorqueCurrentFOC(0);
+  private final MotionMagicDutyCycle mmOut = new MotionMagicDutyCycle(0);
 
   /** Creates a new Intake. */
   public Intake(LoggedTalonFX rollerMotor, LoggedTalonFX slapDownMotor) {
-    this.rollerMotor = rollerMotor.withConfig(LoggedTalonFX.buildStandardConfig(20, 20));
+    this.rollerMotor = rollerMotor.withConfig(LoggedTalonFX.buildStandardConfig(80, 20));
     var slapDownConfig =
         LoggedTalonFX.buildStandardConfig(40, 20)
             .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0))

@@ -110,7 +110,7 @@ public class Turret extends SubsystemBase {
                 new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Brake)
                     .withInverted(InvertedValue.CounterClockwise_Positive))
-            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(10))
+            .withCurrentLimits(new CurrentLimitsConfigs().withStatorCurrentLimit(60))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(44));
     // primary: 12:48, 4:1
     // secondary: 10:110, 11:1
@@ -127,7 +127,7 @@ public class Turret extends SubsystemBase {
 
     RobotModeTriggers.disabled().onTrue(updateFromAbsoluteCommand());
 
-    setDefaultCommand(aimCommand());
+    // setDefaultCommand(aimCommand());
   }
 
   public Command aimCommand() {

@@ -50,14 +50,14 @@ public class Indexer {
 
   public Command outtake() {
     return Commands.parallel(
-        kicker.runRoller(Direction.FORWARD),
+        kicker.runRoller(),
         rollers.runRoller(Direction.FORWARD),
         spindexer.runRoller(Direction.FORWARD));
   }
 
   public Command unjam() {
     return Commands.parallel(
-        kicker.runRoller(Direction.REVERSE),
+        kicker.unjam(),
         rollers.runRoller(Direction.REVERSE),
         spindexer.runRoller(Direction.REVERSE));
   }
