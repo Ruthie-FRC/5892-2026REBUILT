@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
 
   /** Creates a new Intake. */
   public Intake(LoggedTalonFX rollerMotor, LoggedTalonFX slapDownMotor) {
-    this.rollerMotor = rollerMotor.withConfig(LoggedTalonFX.buildStandardConfig(80, 20));
+    this.rollerMotor = rollerMotor.withConfig(LoggedTalonFX.buildStandardConfig(160, 40));
     var slapDownConfig =
         LoggedTalonFX.buildStandardConfig(40, 20)
             .withSlot0(new Slot0Configs().withKP(0).withKI(0).withKD(0).withKS(0).withKV(0))

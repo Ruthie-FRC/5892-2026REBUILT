@@ -101,7 +101,7 @@ public class Turret extends SubsystemBase {
     var config =
         new TalonFXConfiguration()
             .withSlot0(
-                new Slot0Configs().withKP(15).withKI(0).withKD(0).withKS(0.018).withKV(0.085))
+                new Slot0Configs().withKP(10).withKI(0).withKD(0).withKS(0.018).withKV(0.085))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(15)
@@ -116,7 +116,7 @@ public class Turret extends SubsystemBase {
     // secondary: 10:110, 11:1
     // total: 44:1
     motor.withConfig(config).withMMPIDTuning(SlotConfigs.from(config.Slot0), config.MotionMagic);
-    // setDefaultCommand(aimCommand());
+    setDefaultCommand(aimCommand());
     if (Constants.tuningMode) {
       // This command directly sets the turret position to 0. It really should never be used ever
       // ever

@@ -7,7 +7,6 @@ package frc.robot.commands;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -15,12 +14,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShotCalculator.Goal;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +27,7 @@ import org.littletonrobotics.junction.Logger;
 /** Add your docs here. */
 public class Autos {
 
-  public static Command leftCenterAuto(
-      Intake intake, Indexer indexer, Shooter shooter) {
+  public static Command leftCenterAuto(Intake intake, Indexer indexer, Shooter shooter) {
     try {
       final ArrayList<PathPoint> points;
       if (Constants.currentMode == Constants.Mode.SIM) {
@@ -41,9 +37,9 @@ public class Autos {
       }
       // Boilerplate is over. Now do the actual logic
       final Command auto =
-          AutoBuilder.followPath(loadPath("Left_Path_Start", points)).raceWith(intake.intakeSequence(),ShootCommands.shoot(indexer, shooter,Goal.LEFT)).andThen(
-
-          );
+          AutoBuilder.followPath(loadPath("Left_Path_Start", points))
+              .raceWith(intake.intakeSequence(), ShootCommands.shoot(indexer, shooter, Goal.LEFT))
+              .andThen();
       // More boilerplate
       if (Constants.currentMode == Constants.Mode.SIM) {
         Logger.recordOutput(
@@ -70,7 +66,6 @@ public class Autos {
 
   private static Command loadLogFollow(String name, List<PathPoint> points)
       throws IOException, ParseException {
-    return AutoBuilder.followPath(loadPath(name, points))
-        .withName(name);
+    return AutoBuilder.followPath(loadPath(name, points)).withName(name);
   }
 }

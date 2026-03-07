@@ -28,6 +28,12 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right_Path_Return"
+          }
         }
       ]
     }

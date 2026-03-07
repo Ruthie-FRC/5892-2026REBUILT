@@ -35,7 +35,9 @@ public class ShotCalculator {
     return instance;
   }
 
-  public static final Transform2d robotToTurret = new Transform2d();
+  public static final Transform2d robotToTurret =
+      new Transform2d(
+          new Translation2d(Units.inchesToMeters(-6), Units.inchesToMeters(-6)), new Rotation2d());
 
   private static final Translation2d rightTarget =
       AllianceFlipUtil.apply(new Translation2d(1.5, 1.5));
@@ -74,18 +76,19 @@ public class ShotCalculator {
     ;
     phaseDelay = 0.03; // TODO: untuned
     // These are in degrees from verical
-    shotHoodAngleMap.put(Units.feetToMeters(3 + 2), Rotation2d.fromDegrees(20.0));
-    shotHoodAngleMap.put(Units.feetToMeters(5 + 2), Rotation2d.fromDegrees(30.0));
-    shotHoodAngleMap.put(Units.feetToMeters(7 + 2), Rotation2d.fromDegrees(37.0));
-    shotHoodAngleMap.put(Units.feetToMeters(9 + 2), Rotation2d.fromDegrees(42.0));
-    shotHoodAngleMap.put(Units.feetToMeters(11 + 2), Rotation2d.fromDegrees(42.0));
+    shotHoodAngleMap.put(Units.feetToMeters(2 + 2), Rotation2d.fromDegrees(22.0));
+    shotHoodAngleMap.put(Units.feetToMeters(4 + 2), Rotation2d.fromDegrees(28.0));
+    shotHoodAngleMap.put(Units.feetToMeters(6 + 2), Rotation2d.fromDegrees(32.0));
+    shotHoodAngleMap.put(Units.feetToMeters(6 + (11 / 12) + 2), Rotation2d.fromDegrees(29.0));
+    shotHoodAngleMap.put(
+        Units.feetToMeters(197.94), Rotation2d.fromDegrees(42.0)); // 147.5 x, 132 y =
     shotHoodAngleMap.put(Units.feetToMeters(13 + 2), Rotation2d.fromDegrees(44.0));
 
     // M vs RPS
-    shotFlywheelSpeedMap.put(Units.feetToMeters(3 + 2), 60.0);
-    shotFlywheelSpeedMap.put(Units.feetToMeters(5 + 2), 64.0);
-    shotFlywheelSpeedMap.put(Units.feetToMeters(7 + 2), 64.0);
-    shotFlywheelSpeedMap.put(Units.feetToMeters(9 + 2), 66.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(2 + 2), 53.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(4 + 2), 60.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(6 + 2), 66.0);
+    shotFlywheelSpeedMap.put(Units.feetToMeters(6 + (11 / 12) + 2), 82.0);
     shotFlywheelSpeedMap.put(Units.feetToMeters(11 + 2), 72.0);
     shotFlywheelSpeedMap.put(Units.feetToMeters(13 + 2), 77.0);
 
