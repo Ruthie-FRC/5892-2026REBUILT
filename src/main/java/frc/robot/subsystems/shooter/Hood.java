@@ -48,6 +48,19 @@ public class Hood extends SubsystemBase {
       new LoggedTunableMeasure<>("Hood/DownPosition", Degrees.mutable(18.575));
   private final LoggedTunableMeasure<MutAngle> stowPosition =
       new LoggedTunableMeasure<>("Hood/StowAngle", Degrees.mutable(15));
+  // Hard limits for the hood angle (relative to vertical). Requests will be clamped into this
+  // range to prevent commanding into physical stops.
+  private final LoggedTunableMeasure<MutAngle> minAngle =
+      new LoggedTunableMeasure<>("Hood/MinAngle", Degrees.mutable(0));
+  private final LoggedTunableMeasure<MutAngle> maxAngle =
+      new LoggedTunableMeasure<>("Hood/MaxAngle", Degrees.mutable(45));
+  // Slow-stop zone: within this angular distance (deg) from either limit the hood will be
+  // slowed to avoid hitting physical stops at full speed.
+  private final LoggedTunableMeasure<MutAngle> slowZone =
+      new LoggedTunableMeasure<>("Hood/SlowZone", Degrees.mutable(6));
+  // Maximum duty (absolute) permitted while in the slow zone when approaching a limit.
+  private final LoggedTunableNumber slowStopMaxDuty =
+      new LoggedTunableNumber("Hood/SlowStopMaxDuty", 0.25, "%");
   public static LoggedTunableNumber stowTrenchGapOffset =
       new LoggedTunableNumber("Hood/stowTrenchGapOffset", 0, "m");
   private final LoggedTunableMeasure<MutAngle> tolerance =
@@ -71,6 +84,9 @@ public class Hood extends SubsystemBase {
   private final NeutralOut neutralControl = new NeutralOut();
   private final MotionMagicDutyCycle mmControl = new MotionMagicDutyCycle(targetPosition);
   private final DutyCycleOut dutyCycleOut = new DutyCycleOut(0);
+  // The last requested duty-cycle from high-level code. Used so periodic soft-stop can
+  // override open-loop commands (like manual duty tests or homing) when approaching limits.
+  private double lastRequestedDuty = 0.0;
 
   public Hood(LoggedTalonFXS motor) {
     this.motor = motor;
@@ -124,10 +140,12 @@ public class Hood extends SubsystemBase {
     return new FunctionalCommand(
         () -> {
           this.positionControl = false;
+          lastRequestedDuty = homingDutyCycle.get();
           motor.setControl(dutyCycleOut.withOutput(homingDutyCycle.get()));
         },
         () -> {},
         (i) -> {
+          lastRequestedDuty = 0.0;
           motor.setControl(dutyCycleOut.withOutput(0));
           if (!i) {
             setHomed(true);
@@ -158,7 +176,21 @@ public class Hood extends SubsystemBase {
    */
   public void requestAngle(Rotation2d angle) {
     Logger.recordOutput("Hood/RequestedAngle", angle.getDegrees(), "deg");
-    angleToPosition(angle, targetPosition);
+    // Clamp the requested angle to the allowed range so we never command beyond physical
+    // limits. The LoggedTunableMeasures use angular measures, so compare in radians via
+    // baseUnitMagnitude().
+    double minAng = minAngle.get().baseUnitMagnitude();
+    double maxAng = maxAngle.get().baseUnitMagnitude();
+    double req = angle.getRadians();
+    if (req < minAng) {
+      req = minAng;
+    } else if (req > maxAng) {
+      req = maxAng;
+    }
+    final Rotation2d clamped = new Rotation2d(req);
+    angleToPosition(clamped, targetPosition);
+    // We're commanding a position-based move
+    this.positionControl = true;
     motor.setControl(mmControl.withPosition(targetPosition));
   }
 
@@ -232,6 +264,63 @@ public class Hood extends SubsystemBase {
 
     ShotCalculator.getInstance().clearCache();
     LoggedTunableNumber.ifChanged(this, (value) -> this.updateTrenchAreas(), stowTrenchGapOffset);
+    // Soft/slow-stop behavior: if we're performing position control and are approaching
+    // a hard limit, override the motor control with a scaled duty cycle so the hood doesn't
+    // slam into the physical stop at full speed.
+    try {
+      // Current angle (robot-relative)
+      Rotation2d currentAngle = positionToAngle(motor.getPosition());
+      double current = currentAngle.getRadians();
+
+      double minA = minAngle.get().baseUnitMagnitude();
+      double maxA = maxAngle.get().baseUnitMagnitude();
+      double slowZoneRad = slowZone.get().baseUnitMagnitude();
+      double distToMin = current - minA;
+      double distToMax = maxA - current;
+
+      // Velocity and requested duty help us decide if we're moving/commanded toward a limit.
+      double vel = motor.getVelocity().baseUnitMagnitude();
+      double signVel = Math.signum(vel);
+      double signReq = Math.signum(lastRequestedDuty);
+
+      // Decide the primary movement direction: prefer velocity if non-zero, otherwise fall back
+      // to the last requested duty.
+      double signMove = 0.0;
+      final double VEL_EPS = 1e-6;
+      if (Math.abs(vel) > VEL_EPS) {
+        signMove = signVel;
+      } else {
+        signMove = signReq;
+      }
+
+      // We intervene when:
+      // - positionControl is active (we're commanding a Motion Magic move), OR
+      // - we have an open-loop duty request moving toward the same limit, OR
+      // - the motor is currently moving toward a limit (by velocity) and is inside slow zone.
+      if (positionControl
+          || (lastRequestedDuty != 0.0 && Math.signum(lastRequestedDuty) == signMove)
+          || (Math.abs(vel) > VEL_EPS && signMove != 0.0)) {
+        // Approaching min limit
+        if (signMove < 0 && distToMin <= slowZoneRad && distToMin >= 0) {
+          double frac = Math.max(0.0, distToMin / slowZoneRad);
+          double maxDuty = Math.abs(slowStopMaxDuty.get());
+          double scaledMag = maxDuty * Math.max(0.15, frac);
+          double scaled = -Math.abs(scaledMag);
+          motor.setControl(dutyCycleOut.withOutput(scaled));
+        }
+        // Approaching max limit
+        else if (signMove > 0 && distToMax <= slowZoneRad && distToMax >= 0) {
+          double frac = Math.max(0.0, distToMax / slowZoneRad);
+          double maxDuty = Math.abs(slowStopMaxDuty.get());
+          double scaledMag = maxDuty * Math.max(0.15, frac);
+          double scaled = Math.abs(scaledMag);
+          motor.setControl(dutyCycleOut.withOutput(scaled));
+        }
+      }
+    } catch (Exception e) {
+      // Defensive: don't let soft-stop logic crash periodic
+      Logger.recordOutput("Hood/SoftStopError", e.toString());
+    }
   }
 
   /**
@@ -271,9 +360,11 @@ public class Hood extends SubsystemBase {
     return startEnd(
         () -> {
           this.positionControl = false;
+          lastRequestedDuty = dutyCycle;
           motor.setControl(dutyCycleOut.withOutput(dutyCycle));
         },
         () -> {
+          lastRequestedDuty = 0.0;
           motor.setControl(dutyCycleOut.withOutput(0));
         });
   }
