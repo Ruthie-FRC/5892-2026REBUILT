@@ -200,6 +200,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     // 5892: Optimize CAN
     PhoenixUtil.registerSignals(
         TunerConstants.kCANBus,
+        turnPosition,
+        drivePosition,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
